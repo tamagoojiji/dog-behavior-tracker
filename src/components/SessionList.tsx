@@ -30,7 +30,6 @@ export default function SessionList({ sessions, events, onSelect }: SessionListP
     <div className="card">
       {sorted.map(session => {
         const sessionEvents = events.filter(e => e.sessionId === session.id);
-        const successCount = sessionEvents.filter(e => e.behavior === '成功').length;
         return (
           <div key={session.id} className="session-item" onClick={() => onSelect(session)}>
             <div>
@@ -38,7 +37,7 @@ export default function SessionList({ sessions, events, onSelect }: SessionListP
               <div className="session-meta">{formatDuration(session.startTime, session.endTime)}</div>
             </div>
             <div className="session-stats">
-              <div>{sessionEvents.length}件 / {successCount}成功</div>
+              <div>{sessionEvents.length}件</div>
             </div>
           </div>
         );

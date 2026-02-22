@@ -65,7 +65,7 @@ export default function WalkPage() {
 
     saveEvent(event);
     setEventCount(prev => prev + 1);
-    if (behavior === '成功') setSuccessCount(prev => prev + 1);
+    if (behavior === 'アイコンタクト') setSuccessCount(prev => prev + 1);
     resetSelection();
   }, [dog, sessionId, elapsed, stimulus, behavior, latency, distance, currentPosition, resetSelection]);
 
@@ -96,7 +96,7 @@ export default function WalkPage() {
 
       <div className="walk-counter">
         <span>記録: <strong>{eventCount}</strong>件</span>
-        <span>成功: <strong style={{ color: 'var(--success)' }}>{successCount}</strong></span>
+        <span>アイコンタクト: <strong style={{ color: 'var(--success)' }}>{successCount}</strong></span>
       </div>
 
       <div className="section-label">SD（刺激）</div>
@@ -105,15 +105,15 @@ export default function WalkPage() {
       <div className="section-label">行動</div>
       <ButtonGrid options={dog.targetBehaviors} selected={behavior} onSelect={setBehavior} columns={3} />
 
-      <div className="section-label">潜時（秒）</div>
+      <div className="section-label">行動が出るまでの時間</div>
       <ButtonGrid
-        options={dog.latencyOptions.map(l => l === -1 ? 'なし' : `${l}`)}
-        selected={latency === null ? null : latency === -1 ? 'なし' : `${latency}`}
-        onSelect={v => setLatency(v === 'なし' ? -1 : Number(v))}
+        options={dog.latencyOptions.map(l => l === -1 ? 'なし' : `${l}秒`)}
+        selected={latency === null ? null : latency === -1 ? 'なし' : `${latency}秒`}
+        onSelect={v => setLatency(v === 'なし' ? -1 : Number(v.replace('秒', '')))}
         columns={4}
       />
 
-      <div className="section-label">距離</div>
+      <div className="section-label">刺激との距離</div>
       <DistanceScroller options={dog.distanceOptions} selected={distance} onSelect={setDistance} />
 
       <button

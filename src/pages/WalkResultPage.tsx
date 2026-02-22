@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { getSessions, saveSession, getEventsBySession } from '../store/localStorage';
 import SummaryCard from '../components/SummaryCard';
+import EventMap, { BEHAVIOR_COLORS } from '../components/EventMap';
 
 function formatTime(ts: number): string {
   const d = new Date(ts);
@@ -28,10 +29,11 @@ export default function WalkResultPage() {
 
   const stats = useMemo(() => {
     const count = events.length;
-    const successCount = events.filter(e => e.behavior === '成功').length;
     const latencies = events.filter(e => e.latency >= 0).map(e => e.latency);
     const avgLatency = latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) / latencies.length : null;
-    return { count, successCount, avgLatency };
+    const distances = events.map(e => e.distance);
+    const avgDistance = distances.length > 0 ? distances.reduce((a, b) => a + b, 0) / distances.length : null;
+    return { count, avgLatency, avgDistance };
   }, [events]);
 
   if (!session) {
@@ -58,6 +60,9 @@ export default function WalkResultPage() {
 
       <SummaryCard {...stats} />
 
+      <div className="section-label">マップ</div>
+      <EventMap events={events} routePoints={session.routePoints} />
+
       <div className="section-label">記録一覧</div>
       <div className="card">
         <div className="event-row" style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>
@@ -72,7 +77,7 @@ export default function WalkResultPage() {
           events.map(ev => (
             <div key={ev.id} className="event-row">
               <span>{formatTime(ev.timestamp)}</span>
-              <span>{ev.stimulus} → {ev.behavior}</span>
+              <span>{ev.stimulus} → <span style={{ color: BEHAVIOR_COLORS[ev.behavior] || '#757575', fontWeight: 600 }}>{ev.behavior}</span></span>
               <span>{ev.distance}m</span>
               <span>{ev.latency === -1 ? 'なし' : `${ev.latency}s`}</span>
             </div>

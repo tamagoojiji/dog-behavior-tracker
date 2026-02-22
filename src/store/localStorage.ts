@@ -88,3 +88,23 @@ export function saveEvent(event: BehaviorEvent): void {
 export function getEventsByDog(dogId: string): BehaviorEvent[] {
   return getEvents().filter(e => e.dogId === dogId);
 }
+
+// セッション・イベントのみクリア（犬データは保持）
+export function clearSessionData(): void {
+  localStorage.removeItem(KEYS.sessions);
+  localStorage.removeItem(KEYS.events);
+}
+
+// マイグレーション: 「成功」→「アイコンタクト」
+export function migrateData(): void {
+  const dogs = getDogs();
+  let changed = false;
+  for (const dog of dogs) {
+    const idx = dog.targetBehaviors.indexOf('成功');
+    if (idx >= 0) {
+      dog.targetBehaviors[idx] = 'アイコンタクト';
+      changed = true;
+    }
+  }
+  if (changed) setItem(KEYS.dogs, dogs);
+}

@@ -7,6 +7,7 @@ import WalkPage from './pages/WalkPage';
 import WalkResultPage from './pages/WalkResultPage';
 import SettingsPage from './pages/SettingsPage';
 import StatsPage from './pages/StatsPage';
+import MapTestPage from './pages/MapTestPage';
 
 function RequireSetup({ children }: { children: React.ReactNode }) {
   const dog = getActiveDog();
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/walk-result/:sessionId" element={<RequireSetup><WalkResultPage /></RequireSetup>} />
         <Route path="/settings" element={<RequireSetup><SettingsPage /></RequireSetup>} />
         <Route path="/stats" element={<RequireSetup><StatsPage /></RequireSetup>} />
+        <Route path="/map-test" element={<MapTestPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />

@@ -6,7 +6,7 @@ interface ButtonGridProps {
   successLabel?: string;
 }
 
-export default function ButtonGrid({ options, selected, onSelect, columns = 3, successLabel = '成功' }: ButtonGridProps) {
+export default function ButtonGrid({ options, selected, onSelect, columns = 3, successLabel = 'アイコンタクト' }: ButtonGridProps) {
   return (
     <div className={`btn-grid btn-grid-${columns}`}>
       {options.map(option => (

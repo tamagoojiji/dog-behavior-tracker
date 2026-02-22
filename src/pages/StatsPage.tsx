@@ -2,6 +2,22 @@ import { useMemo } from 'react';
 import { getActiveDog, getEventsByDog, getSessionsByDog } from '../store/localStorage';
 import { Navigate } from 'react-router-dom';
 import SummaryCard from '../components/SummaryCard';
+import {
+  ComposedChart, Line, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+
+function formatDateShort(ts: number): string {
+  const d = new Date(ts);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+interface DailyPoint {
+  date: string;
+  avgLatency: number | null;
+  avgDistance: number | null;
+  count: number;
+}
 
 export default function StatsPage() {
   const dog = getActiveDog();
@@ -11,19 +27,58 @@ export default function StatsPage() {
     const events = getEventsByDog(dog.id);
     const sessions = getSessionsByDog(dog.id);
     const count = events.length;
-    const successCount = events.filter(e => e.behavior === '成功').length;
     const latencies = events.filter(e => e.latency >= 0).map(e => e.latency);
     const avgLatency = latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) / latencies.length : null;
+    const distances = events.map(e => e.distance);
+    const avgDistance = distances.length > 0 ? distances.reduce((a, b) => a + b, 0) / distances.length : null;
 
     // SD別集計
     const byStimulus: Record<string, { total: number; success: number }> = {};
     for (const e of events) {
       if (!byStimulus[e.stimulus]) byStimulus[e.stimulus] = { total: 0, success: 0 };
       byStimulus[e.stimulus].total++;
-      if (e.behavior === '成功') byStimulus[e.stimulus].success++;
+      if (e.behavior === 'アイコンタクト') byStimulus[e.stimulus].success++;
     }
 
-    return { count, successCount, avgLatency, sessionCount: sessions.length, byStimulus };
+    // 行動別・日別推移データ
+    const behaviors = [...new Set(events.map(e => e.behavior))];
+    const byBehavior: Record<string, { daily: DailyPoint[]; total: number }> = {};
+
+    for (const behavior of behaviors) {
+      const bEvents = events.filter(e => e.behavior === behavior);
+      const dailyMap: Record<string, { latencies: number[]; distances: number[] }> = {};
+
+      for (const ev of bEvents) {
+        const dateKey = formatDateShort(ev.timestamp);
+        if (!dailyMap[dateKey]) dailyMap[dateKey] = { latencies: [], distances: [] };
+        if (ev.latency >= 0) dailyMap[dateKey].latencies.push(ev.latency);
+        dailyMap[dateKey].distances.push(ev.distance);
+      }
+
+      // 日付順にソート
+      const sortedDates = Object.keys(dailyMap).sort((a, b) => {
+        const [am, ad] = a.split('/').map(Number);
+        const [bm, bd] = b.split('/').map(Number);
+        return am !== bm ? am - bm : ad - bd;
+      });
+
+      const daily: DailyPoint[] = sortedDates.map(date => {
+        const d = dailyMap[date];
+        return {
+          date,
+          avgLatency: d.latencies.length > 0 ? +(d.latencies.reduce((a, b) => a + b, 0) / d.latencies.length).toFixed(1) : null,
+          avgDistance: d.distances.length > 0 ? +(d.distances.reduce((a, b) => a + b, 0) / d.distances.length).toFixed(0) : null,
+          count: d.distances.length,
+        };
+      });
+
+      byBehavior[behavior] = { daily, total: bEvents.length };
+    }
+
+    // 合計回数順にソート
+    const sortedBehaviors = Object.entries(byBehavior).sort((a, b) => b[1].total - a[1].total);
+
+    return { count, avgLatency, avgDistance, sessionCount: sessions.length, byStimulus, sortedBehaviors };
   }, [dog?.id]);
 
   if (!dog) {
@@ -46,9 +101,38 @@ export default function StatsPage() {
       <h1 className="page-title">統計</h1>
 
       <div className="section-label">全体サマリー（{stats.sessionCount}回の散歩）</div>
-      <SummaryCard count={stats.count} successCount={stats.successCount} avgLatency={stats.avgLatency} />
+      <SummaryCard count={stats.count} avgLatency={stats.avgLatency} avgDistance={stats.avgDistance} />
 
-      <div className="section-label">SD別成功率</div>
+      {stats.sortedBehaviors.map(([behavior, data]) => (
+        <div key={behavior}>
+          <div className="section-label">{behavior}（{data.total}回）</div>
+          <div className="card" style={{ padding: '12px 8px' }}>
+            {data.daily.length >= 2 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <ComposedChart data={data.daily} margin={{ top: 12, right: 4, left: -8, bottom: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8" />
+                  <XAxis dataKey="date" fontSize={12} tick={{ fill: '#555' }} tickMargin={6} />
+                  <YAxis yAxisId="latency" fontSize={12} unit="s" tick={{ fill: '#ff9800' }} tickMargin={4} width={42} />
+                  <YAxis yAxisId="distance" orientation="right" fontSize={12} unit="m" tick={{ fill: '#4a90d9' }} tickMargin={4} width={42} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: 8, fontSize: 13, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
+                    formatter={(value, name) => name === '潜時' ? [`${value}s`, name] : [`${value}m`, name]}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+                  <Bar yAxisId="distance" dataKey="avgDistance" name="距離" fill="#4a90d9" fillOpacity={0.5} radius={[4, 4, 0, 0]} />
+                  <Line yAxisId="latency" type="monotone" dataKey="avgLatency" name="潜時" stroke="#ff9800" strokeWidth={2.5} dot={{ r: 4, fill: '#ff9800' }} connectNulls />
+                </ComposedChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ fontSize: 14, color: 'var(--text-secondary)', textAlign: 'center', padding: 12 }}>
+                潜時: {data.daily[0]?.avgLatency ?? '-'}s / 距離: {data.daily[0]?.avgDistance ?? '-'}m
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+
+      <div className="section-label">行動の出現率</div>
       <div className="card">
         {Object.entries(stats.byStimulus).map(([sd, data]) => {
           const rate = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;

@@ -359,6 +359,13 @@ select.input {
   border-bottom: none;
 }
 
+/* Leaflet */
+.leaflet-container {
+  height: 280px !important;
+  width: 100% !important;
+  z-index: 1;
+}
+
 /* Settings */
 .setting-group {
   margin-bottom: 20px;
