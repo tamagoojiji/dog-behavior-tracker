@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { getActiveDog } from './store/localStorage';
 import BottomNav from './components/BottomNav';
 import LoginPage from './pages/LoginPage';
@@ -17,7 +17,7 @@ function RequireSetup({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<RequireSetup><HomePage /></RequireSetup>} />
@@ -29,6 +29,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
