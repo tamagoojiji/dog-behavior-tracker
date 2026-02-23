@@ -4,6 +4,7 @@ import { getActiveDog, saveSession, saveEvent } from './localStorage';
 const STIMULI = ['犬', '人', '自転車', '車', '音', 'その他'];
 const BEHAVIORS = ['吠え', '突進', '固まる', '回避', '引張り', 'アイコンタクト'];
 const LATENCIES = [0, 1, 2, 3, 4, 5, -1];
+const DURATIONS = [1, 2, 3, 5, 10, 15, 30, 60];
 const DISTANCES = [1, 2, 3, 5, 7, 10, 15, 20, 30, 50];
 
 // 大阪城公園周辺（散歩コースとしてリアル）
@@ -83,6 +84,7 @@ export function generateTestData(walkCount = 14) {
         stimulus: pick(STIMULI),
         behavior,
         latency: behavior === 'アイコンタクト' ? pick([-1, 0, 1]) : pick(LATENCIES),
+        duration: pick(DURATIONS),
         distance: pick(DISTANCES),
         comment: '',
         location: { lat: loc.lat + randFloat(-0.0001, 0.0001), lng: loc.lng + randFloat(-0.0001, 0.0001), timestamp: loc.timestamp },

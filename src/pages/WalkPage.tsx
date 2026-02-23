@@ -24,6 +24,7 @@ export default function WalkPage() {
   const [stimulus, setStimulus] = useState<string | null>(null);
   const [behavior, setBehavior] = useState<string | null>(null);
   const [latency, setLatency] = useState<number | null>(null);
+  const [duration, setDuration] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [comment, setComment] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -48,6 +49,7 @@ export default function WalkPage() {
     setStimulus(null);
     setBehavior(null);
     setLatency(null);
+    setDuration(null);
     setDistance(null);
     setComment('');
     setIsListening(false);
@@ -65,6 +67,7 @@ export default function WalkPage() {
       stimulus,
       behavior,
       latency,
+      duration,
       distance,
       comment,
       location: currentPosition,
@@ -74,7 +77,7 @@ export default function WalkPage() {
     setEventCount(prev => prev + 1);
     if (behavior === 'アイコンタクト') setSuccessCount(prev => prev + 1);
     resetSelection();
-  }, [dog, sessionId, elapsed, stimulus, behavior, latency, distance, comment, currentPosition, resetSelection]);
+  }, [dog, sessionId, elapsed, stimulus, behavior, latency, duration, distance, comment, currentPosition, resetSelection]);
 
   const handleEnd = useCallback(() => {
     if (!dog) return;
@@ -141,6 +144,14 @@ export default function WalkPage() {
         options={dog.latencyOptions.map(l => l === -1 ? 'なし' : `${l}秒`)}
         selected={latency === null ? null : latency === -1 ? 'なし' : `${latency}秒`}
         onSelect={v => setLatency(v === 'なし' ? -1 : Number(v.replace('秒', '')))}
+        columns={4}
+      />
+
+      <div className="section-label">行動の持続時間</div>
+      <ButtonGrid
+        options={dog.durationOptions.map(d => `${d}秒`)}
+        selected={duration === null ? null : `${duration}秒`}
+        onSelect={v => setDuration(Number(v.replace('秒', '')))}
         columns={4}
       />
 

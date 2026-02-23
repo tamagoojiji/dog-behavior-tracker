@@ -49,16 +49,17 @@ function createRecognition(): SpeechRecognitionInstance | null {
   return r;
 }
 
-function EventEditor({ event, dog, onSave }: { event: BehaviorEvent; dog: { targetBehaviors: string[]; behaviorsByStimulus?: Record<string, string[]>; latencyOptions: number[]; distanceOptions: number[] }; onSave: (e: BehaviorEvent) => void }) {
+function EventEditor({ event, dog, onSave }: { event: BehaviorEvent; dog: { targetBehaviors: string[]; behaviorsByStimulus?: Record<string, string[]>; latencyOptions: number[]; durationOptions: number[]; distanceOptions: number[] }; onSave: (e: BehaviorEvent) => void }) {
   const [behavior, setBehavior] = useState(event.behavior);
   const [latency, setLatency] = useState(event.latency);
+  const [duration, setDuration] = useState(event.duration ?? null);
   const [distance, setDistance] = useState(event.distance);
   const [comment, setComment] = useState(event.comment ?? '');
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null);
 
   const handleSave = () => {
-    onSave({ ...event, behavior, latency, distance, comment });
+    onSave({ ...event, behavior, latency, duration, distance, comment });
   };
 
   const toggleSpeech = useCallback(() => {
@@ -112,6 +113,20 @@ function EventEditor({ event, dog, onSave }: { event: BehaviorEvent; dog: { targ
             </button>
           );
         })}
+      </div>
+
+      <div className="section-label">持続時間</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {dog.durationOptions.map(d => (
+          <button
+            key={d}
+            className={`btn-option ${duration === d ? 'selected' : ''}`}
+            style={{ padding: '6px 12px', fontSize: 13, minHeight: 36 }}
+            onClick={() => setDuration(d)}
+          >
+            {d}秒
+          </button>
+        ))}
       </div>
 
       <div className="section-label">距離</div>

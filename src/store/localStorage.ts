@@ -1,4 +1,5 @@
 import type { Dog, Session, BehaviorEvent } from '../types';
+import { DEFAULT_DURATIONS } from '../types';
 
 const KEYS = {
   dogs: 'dbt_dogs',
@@ -113,6 +114,11 @@ export function migrateData(): void {
     const idx = dog.targetBehaviors.indexOf('成功');
     if (idx >= 0) {
       dog.targetBehaviors[idx] = 'アイコンタクト';
+      changed = true;
+    }
+    // durationOptions が未設定 → デフォルト値を設定
+    if (!dog.durationOptions) {
+      dog.durationOptions = [...DEFAULT_DURATIONS];
       changed = true;
     }
     // behaviorsByStimulus が未設定 → 全SDに全行動を割り当て

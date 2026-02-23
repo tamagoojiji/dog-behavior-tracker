@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { getActiveDog, getDogs, saveDog, setActiveDogId, clearSessionData } from '../store/localStorage';
 import { Navigate } from 'react-router-dom';
 import type { Dog } from '../types';
-import { DEFAULT_STIMULI, DEFAULT_BEHAVIORS, DEFAULT_LATENCIES, DEFAULT_DISTANCES } from '../types';
+import { DEFAULT_STIMULI, DEFAULT_BEHAVIORS, DEFAULT_LATENCIES, DEFAULT_DURATIONS, DEFAULT_DISTANCES } from '../types';
 import { generateTestData } from '../store/testData';
 
 function AddableList({ title, items, onAdd }: { title: string; items: string[]; onAdd: (item: string) => void }) {
@@ -166,6 +166,7 @@ export default function SettingsPage() {
       stimulusOptions: defaultStimuli,
       behaviorsByStimulus,
       latencyOptions: [...DEFAULT_LATENCIES],
+      durationOptions: [...DEFAULT_DURATIONS],
       distanceOptions: [...DEFAULT_DISTANCES],
       goal: '反応を減らす',
     };
@@ -269,6 +270,13 @@ export default function SettingsPage() {
         items={dog.latencyOptions}
         unit="秒"
         onAdd={item => updateDog(d => ({ ...d, latencyOptions: [...d.latencyOptions, item].sort((a, b) => a - b) }))}
+      />
+
+      <AddableNumberList
+        title="行動の持続時間"
+        items={dog.durationOptions}
+        unit="秒"
+        onAdd={item => updateDog(d => ({ ...d, durationOptions: [...d.durationOptions, item].sort((a, b) => a - b) }))}
       />
 
       <AddableNumberList

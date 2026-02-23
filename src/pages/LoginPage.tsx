@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Dog } from '../types';
-import { DEFAULT_STIMULI, DEFAULT_BEHAVIORS, DEFAULT_LATENCIES, DEFAULT_DISTANCES } from '../types';
+import { DEFAULT_STIMULI, DEFAULT_BEHAVIORS, DEFAULT_LATENCIES, DEFAULT_DURATIONS, DEFAULT_DISTANCES } from '../types';
 import { getDogs, saveDog, setActiveDogId } from '../store/localStorage';
 
 export default function LoginPage() {
@@ -31,6 +31,7 @@ export default function LoginPage() {
       stimulusOptions: defaultStimuli,
       behaviorsByStimulus,
       latencyOptions: [...DEFAULT_LATENCIES],
+      durationOptions: [...DEFAULT_DURATIONS],
       distanceOptions: [...DEFAULT_DISTANCES],
       goal: goal.trim() || '反応を減らす',
     };
