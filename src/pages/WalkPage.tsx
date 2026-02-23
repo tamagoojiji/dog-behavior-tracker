@@ -219,17 +219,17 @@ export default function WalkPage() {
             }}
             onClick={handleStartRecord}
           >
-            行動発生
+            行動発生したらタップ
           </button>
 
-          {/* 前回の記録を編集 */}
+          {/* 直前の記録を編集 */}
           {pendingEvent && (
             <div className="card" style={{ marginTop: 16 }}>
               <div style={{
                 display: 'flex', justifyContent: 'space-between',
                 alignItems: 'center', marginBottom: 8,
               }}>
-                <strong style={{ fontSize: 14 }}>前回の記録を編集</strong>
+                <strong style={{ fontSize: 14 }}>直前の記録を編集</strong>
                 <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                   {pendingEvent.duration != null ? `${pendingEvent.duration}秒` : ''}
                   {pendingEvent.distance != null ? ` / ${pendingEvent.distance}m` : ''}
