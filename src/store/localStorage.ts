@@ -89,20 +89,38 @@ export function getEventsByDog(dogId: string): BehaviorEvent[] {
   return getEvents().filter(e => e.dogId === dogId);
 }
 
+export function updateEvent(updated: BehaviorEvent): void {
+  const events = getEvents();
+  const idx = events.findIndex(e => e.id === updated.id);
+  if (idx >= 0) {
+    events[idx] = updated;
+    setItem(KEYS.events, events);
+  }
+}
+
 // セッション・イベントのみクリア（犬データは保持）
 export function clearSessionData(): void {
   localStorage.removeItem(KEYS.sessions);
   localStorage.removeItem(KEYS.events);
 }
 
-// マイグレーション: 「成功」→「アイコンタクト」
+// マイグレーション
 export function migrateData(): void {
   const dogs = getDogs();
   let changed = false;
   for (const dog of dogs) {
+    // 「成功」→「アイコンタクト」
     const idx = dog.targetBehaviors.indexOf('成功');
     if (idx >= 0) {
       dog.targetBehaviors[idx] = 'アイコンタクト';
+      changed = true;
+    }
+    // behaviorsByStimulus が未設定 → 全SDに全行動を割り当て
+    if (!dog.behaviorsByStimulus) {
+      dog.behaviorsByStimulus = {};
+      for (const sd of dog.stimulusOptions) {
+        dog.behaviorsByStimulus[sd] = [...dog.targetBehaviors];
+      }
       changed = true;
     }
   }

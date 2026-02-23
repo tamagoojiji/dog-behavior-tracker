@@ -84,6 +84,7 @@ export function generateTestData(walkCount = 14) {
         behavior,
         latency: behavior === 'アイコンタクト' ? pick([-1, 0, 1]) : pick(LATENCIES),
         distance: pick(DISTANCES),
+        comment: '',
         location: { lat: loc.lat + randFloat(-0.0001, 0.0001), lng: loc.lng + randFloat(-0.0001, 0.0001), timestamp: loc.timestamp },
       };
       saveEvent(event);

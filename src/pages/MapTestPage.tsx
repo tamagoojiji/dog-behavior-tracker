@@ -58,7 +58,7 @@ export default function MapTestPage() {
             color: '#e53935',
             fillColor: '#e53935',
             fillOpacity: 0.8,
-          }).addTo(map).bindPopup(`${ev.stimulus} → ${ev.behavior}`);
+          }).addTo(map).bindPopup(`${ev.stimulus} → ${ev.behavior ?? '未入力'}`);
         }
       }
 

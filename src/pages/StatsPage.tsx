@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { getActiveDog, getEventsByDog, getSessionsByDog } from '../store/localStorage';
 import { Navigate } from 'react-router-dom';
 import SummaryCard from '../components/SummaryCard';
@@ -10,6 +10,11 @@ import {
 function formatDateShort(ts: number): string {
   const d = new Date(ts);
   return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+function formatDateFull(ts: number): string {
+  const d = new Date(ts);
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
 }
 
 interface DailyPoint {
@@ -27,9 +32,9 @@ export default function StatsPage() {
     const events = getEventsByDog(dog.id);
     const sessions = getSessionsByDog(dog.id);
     const count = events.length;
-    const latencies = events.filter(e => e.latency >= 0).map(e => e.latency);
+    const latencies = events.filter(e => e.latency !== null && e.latency >= 0).map(e => e.latency!);
     const avgLatency = latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) / latencies.length : null;
-    const distances = events.map(e => e.distance);
+    const distances = events.filter(e => e.distance !== null).map(e => e.distance!);
     const avgDistance = distances.length > 0 ? distances.reduce((a, b) => a + b, 0) / distances.length : null;
 
     // SD別集計
@@ -41,18 +46,18 @@ export default function StatsPage() {
     }
 
     // 行動別・日別推移データ
-    const behaviors = [...new Set(events.map(e => e.behavior))];
+    const behaviorsSet = new Set(events.map(e => e.behavior).filter((b): b is string => b !== null));
     const byBehavior: Record<string, { daily: DailyPoint[]; total: number }> = {};
 
-    for (const behavior of behaviors) {
+    for (const behavior of behaviorsSet) {
       const bEvents = events.filter(e => e.behavior === behavior);
       const dailyMap: Record<string, { latencies: number[]; distances: number[] }> = {};
 
       for (const ev of bEvents) {
         const dateKey = formatDateShort(ev.timestamp);
         if (!dailyMap[dateKey]) dailyMap[dateKey] = { latencies: [], distances: [] };
-        if (ev.latency >= 0) dailyMap[dateKey].latencies.push(ev.latency);
-        dailyMap[dateKey].distances.push(ev.distance);
+        if (ev.latency !== null && ev.latency >= 0) dailyMap[dateKey].latencies.push(ev.latency);
+        if (ev.distance !== null) dailyMap[dateKey].distances.push(ev.distance);
       }
 
       // 日付順にソート
@@ -68,7 +73,7 @@ export default function StatsPage() {
           date,
           avgLatency: d.latencies.length > 0 ? +(d.latencies.reduce((a, b) => a + b, 0) / d.latencies.length).toFixed(1) : null,
           avgDistance: d.distances.length > 0 ? +(d.distances.reduce((a, b) => a + b, 0) / d.distances.length).toFixed(0) : null,
-          count: d.distances.length,
+          count: d.latencies.length + d.distances.length,
         };
       });
 
@@ -80,6 +85,30 @@ export default function StatsPage() {
 
     return { count, avgLatency, avgDistance, sessionCount: sessions.length, byStimulus, sortedBehaviors };
   }, [dog?.id]);
+
+  const handleCsvDownload = useCallback(() => {
+    if (!dog) return;
+    const events = getEventsByDog(dog.id);
+    const bom = '\uFEFF';
+    const header = '日時,刺激,行動,潜時(秒),距離(m),コメント';
+    const rows = events.map(e => {
+      const date = formatDateFull(e.timestamp);
+      const stimulus = e.stimulus;
+      const behavior = e.behavior ?? '';
+      const latency = e.latency !== null ? (e.latency === -1 ? 'なし' : String(e.latency)) : '';
+      const distance = e.distance !== null ? String(e.distance) : '';
+      const comment = (e.comment ?? '').replace(/"/g, '""');
+      return `${date},${stimulus},${behavior},${latency},${distance},"${comment}"`;
+    });
+    const csv = bom + header + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${dog.name}_行動記録.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [dog]);
 
   if (!dog) {
     return <Navigate to="/login" replace />;
@@ -99,6 +128,14 @@ export default function StatsPage() {
   return (
     <div className="page">
       <h1 className="page-title">統計</h1>
+
+      <button
+        className="btn btn-primary btn-full"
+        style={{ marginBottom: 12 }}
+        onClick={handleCsvDownload}
+      >
+        CSVダウンロード
+      </button>
 
       <div className="section-label">全体サマリー（{stats.sessionCount}回の散歩）</div>
       <SummaryCard count={stats.count} avgLatency={stats.avgLatency} avgDistance={stats.avgDistance} />

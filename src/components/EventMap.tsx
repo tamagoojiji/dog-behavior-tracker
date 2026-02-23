@@ -45,7 +45,10 @@ export default function EventMap({ events, routePoints }: EventMapProps) {
 
     // イベントピン
     for (const ev of locatedEvents) {
-      const color = BEHAVIOR_COLORS[ev.behavior] || '#757575';
+      const color = ev.behavior ? (BEHAVIOR_COLORS[ev.behavior] || '#757575') : '#bdbdbd';
+      const behaviorLabel = ev.behavior ?? '未入力';
+      const distLabel = ev.distance !== null ? `${ev.distance}m` : '未入力';
+      const latLabel = ev.latency === null ? '未入力' : ev.latency === -1 ? 'なし' : `${ev.latency}s`;
       L.circleMarker([ev.location!.lat, ev.location!.lng], {
         radius: 10,
         color: 'white',
@@ -53,7 +56,7 @@ export default function EventMap({ events, routePoints }: EventMapProps) {
         fillColor: color,
         fillOpacity: 0.9,
       })
-        .bindPopup(`<b>${ev.stimulus} → ${ev.behavior}</b><br>距離: ${ev.distance}m / 潜時: ${ev.latency === -1 ? 'なし' : ev.latency + 's'}`)
+        .bindPopup(`<b>${ev.stimulus} → ${behaviorLabel}</b><br>距離: ${distLabel} / 潜時: ${latLabel}`)
         .addTo(map);
     }
 

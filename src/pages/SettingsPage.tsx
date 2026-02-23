@@ -70,6 +70,62 @@ function AddableNumberList({ title, items, unit, onAdd }: { title: string; items
   );
 }
 
+function BehaviorByStimulus({ dog, updateDog }: { dog: Dog; updateDog: (updater: (d: Dog) => Dog) => void }) {
+  const [openSd, setOpenSd] = useState<string | null>(null);
+
+  const toggle = (sd: string, behavior: string, checked: boolean) => {
+    updateDog(d => {
+      const current = d.behaviorsByStimulus[sd] ?? [...d.targetBehaviors];
+      const next = checked
+        ? [...current, behavior]
+        : current.filter(b => b !== behavior);
+      return { ...d, behaviorsByStimulus: { ...d.behaviorsByStimulus, [sd]: next } };
+    });
+  };
+
+  return (
+    <div className="setting-group">
+      <div className="setting-title">SDごとの行動テンプレート</div>
+      <div className="card" style={{ padding: 0 }}>
+        {dog.stimulusOptions.map(sd => {
+          const isOpen = openSd === sd;
+          const behaviors = dog.behaviorsByStimulus[sd] ?? dog.targetBehaviors;
+          return (
+            <div key={sd}>
+              <div
+                style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid var(--border)',
+                }}
+                onClick={() => setOpenSd(isOpen ? null : sd)}
+              >
+                <span style={{ fontWeight: 600 }}>{sd}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                  {behaviors.length}/{dog.targetBehaviors.length} {isOpen ? '▲' : '▼'}
+                </span>
+              </div>
+              {isOpen && (
+                <div style={{ padding: '8px 14px 12px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {dog.targetBehaviors.map(b => (
+                    <label key={b} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14 }}>
+                      <input
+                        type="checkbox"
+                        checked={behaviors.includes(b)}
+                        onChange={e => toggle(sd, b, e.target.checked)}
+                      />
+                      {b}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const [dog, setDog] = useState<Dog | null>(getActiveDog);
   const [allDogs, setAllDogs] = useState<Dog[]>(getDogs);
@@ -97,11 +153,18 @@ export default function SettingsPage() {
   const handleAddDog = () => {
     const trimmed = newDogName.trim();
     if (!trimmed) return;
+    const defaultBehaviors = [...DEFAULT_BEHAVIORS];
+    const defaultStimuli = [...DEFAULT_STIMULI];
+    const behaviorsByStimulus: Record<string, string[]> = {};
+    for (const sd of defaultStimuli) {
+      behaviorsByStimulus[sd] = [...defaultBehaviors];
+    }
     const newDog: Dog = {
       id: crypto.randomUUID(),
       name: trimmed,
-      targetBehaviors: [...DEFAULT_BEHAVIORS],
-      stimulusOptions: [...DEFAULT_STIMULI],
+      targetBehaviors: defaultBehaviors,
+      stimulusOptions: defaultStimuli,
+      behaviorsByStimulus,
       latencyOptions: [...DEFAULT_LATENCIES],
       distanceOptions: [...DEFAULT_DISTANCES],
       goal: '反応を減らす',
@@ -180,14 +243,26 @@ export default function SettingsPage() {
       <AddableList
         title="SD（刺激）候補"
         items={dog.stimulusOptions}
-        onAdd={item => updateDog(d => ({ ...d, stimulusOptions: [...d.stimulusOptions, item] }))}
+        onAdd={item => updateDog(d => ({
+          ...d,
+          stimulusOptions: [...d.stimulusOptions, item],
+          behaviorsByStimulus: { ...d.behaviorsByStimulus, [item]: [...d.targetBehaviors] },
+        }))}
       />
 
       <AddableList
         title="行動候補"
         items={dog.targetBehaviors}
-        onAdd={item => updateDog(d => ({ ...d, targetBehaviors: [...d.targetBehaviors, item] }))}
+        onAdd={item => updateDog(d => {
+          const updated: Record<string, string[]> = {};
+          for (const sd of d.stimulusOptions) {
+            updated[sd] = [...(d.behaviorsByStimulus[sd] ?? d.targetBehaviors), item];
+          }
+          return { ...d, targetBehaviors: [...d.targetBehaviors, item], behaviorsByStimulus: updated };
+        })}
       />
+
+      <BehaviorByStimulus dog={dog} updateDog={updateDog} />
 
       <AddableNumberList
         title="行動が出るまでの時間"

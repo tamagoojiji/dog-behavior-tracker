@@ -15,9 +15,9 @@ function getWeekStart(): number {
 
 function calcStats(events: BehaviorEvent[]) {
   const count = events.length;
-  const latencies = events.filter(e => e.latency >= 0).map(e => e.latency);
+  const latencies = events.filter(e => e.latency !== null && e.latency >= 0).map(e => e.latency!);
   const avgLatency = latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) / latencies.length : null;
-  const distances = events.map(e => e.distance);
+  const distances = events.filter(e => e.distance !== null).map(e => e.distance!);
   const avgDistance = distances.length > 0 ? distances.reduce((a, b) => a + b, 0) / distances.length : null;
   return { count, avgLatency, avgDistance };
 }

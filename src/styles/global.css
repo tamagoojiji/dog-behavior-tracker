@@ -407,3 +407,56 @@ select.input {
   padding: 8px 16px;
   font-size: 14px;
 }
+
+/* Comment input with mic button */
+.comment-input-wrap {
+  position: relative;
+}
+
+.comment-input-wrap textarea {
+  padding-right: 48px;
+}
+
+.mic-btn {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mic-btn.listening {
+  background: var(--danger);
+  animation: pulse-mic 1s infinite;
+}
+
+@keyframes pulse-mic {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Badge for empty fields */
+.badge-empty {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--warning);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Event editor */
+.event-editor {
+  padding: 8px 0 12px;
+  border-bottom: 1px solid var(--border);
+}
