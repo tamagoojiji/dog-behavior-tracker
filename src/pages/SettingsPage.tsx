@@ -119,6 +119,7 @@ export default function SettingsPage() {
   const [dog, setDog] = useState<Dog | null>(getActiveDog);
   const [allDogs, setAllDogs] = useState<Dog[]>(getDogs);
   const [name, setName] = useState(dog?.name ?? '');
+  const [breed, setBreed] = useState(dog?.breed ?? '');
   const [goal, setGoal] = useState(dog?.goal ?? '');
   const [newDogName, setNewDogName] = useState('');
   const [syncing, setSyncing] = useState(false);
@@ -139,7 +140,7 @@ export default function SettingsPage() {
   }
 
   const handleSaveProfile = () => {
-    updateDog(d => ({ ...d, name: name.trim() || d.name, goal: goal.trim() || d.goal }));
+    updateDog(d => ({ ...d, name: name.trim() || d.name, breed: breed.trim(), goal: goal.trim() || d.goal }));
   };
 
   const handleAddDog = () => {
@@ -148,6 +149,7 @@ export default function SettingsPage() {
     const newDog: Dog = {
       id: crypto.randomUUID(),
       name: trimmed,
+      breed: '',
       targetBehaviors: [...DEFAULT_BEHAVIORS],
       stimulusOptions: [...DEFAULT_STIMULI],
       latencyOptions: [...DEFAULT_LATENCIES],
@@ -167,6 +169,7 @@ export default function SettingsPage() {
     setAllDogs(getDogs());
     if (switched) {
       setName(switched.name);
+      setBreed(switched.breed ?? '');
       setGoal(switched.goal);
     }
   };
@@ -239,6 +242,8 @@ export default function SettingsPage() {
         <div className="card">
           <label className="label" style={{ marginTop: 0 }}>犬の名前</label>
           <input className="input" value={name} onChange={e => setName(e.target.value)} onBlur={handleSaveProfile} />
+          <label className="label">犬種</label>
+          <input className="input" placeholder="例: 柴犬" value={breed} onChange={e => setBreed(e.target.value)} onBlur={handleSaveProfile} />
           <label className="label">目標</label>
           <input className="input" value={goal} onChange={e => setGoal(e.target.value)} onBlur={handleSaveProfile} />
         </div>
