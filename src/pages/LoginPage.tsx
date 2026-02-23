@@ -18,9 +18,8 @@ export default function LoginPage() {
   // 初期ステップ: 犬がいなければ新規犬作成、いれば選択
   const [step, setStep] = useState<Step>(dogs.length === 0 ? 'newDog' : 'selectDog');
 
-  // 犬の名前・犬種・目標
+  // 犬の名前・目標
   const [name, setName] = useState('');
-  const [breed, setBreed] = useState('');
   const [goal, setGoal] = useState('');
 
   // 同期設定
@@ -69,7 +68,6 @@ export default function LoginPage() {
     const dog: Dog = {
       id: crypto.randomUUID(),
       name: name.trim(),
-      breed: breed.trim(),
       targetBehaviors: [...DEFAULT_BEHAVIORS],
       stimulusOptions: [...DEFAULT_STIMULI],
       latencyOptions: [...DEFAULT_LATENCIES],
@@ -301,14 +299,6 @@ export default function LoginPage() {
             value={name}
             onChange={e => setName(e.target.value)}
             autoFocus
-          />
-
-          <label className="label">犬種</label>
-          <input
-            className="input"
-            placeholder="例: 柴犬"
-            value={breed}
-            onChange={e => setBreed(e.target.value)}
           />
 
           <label className="label">目標</label>

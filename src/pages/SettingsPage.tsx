@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { getActiveDog, getDogs, saveDog, setActiveDogId, clearSessionData } from '../store/localStorage';
+import { getActiveDog, getDogs, saveDog, removeDog, setActiveDogId, clearSessionData } from '../store/localStorage';
 import { Navigate, useNavigate } from 'react-router-dom';
 import type { Dog } from '../types';
 import { DEFAULT_STIMULI, DEFAULT_BEHAVIORS, DEFAULT_LATENCIES, DEFAULT_DURATIONS, DEFAULT_DISTANCES } from '../types';
@@ -119,7 +119,6 @@ export default function SettingsPage() {
   const [dog, setDog] = useState<Dog | null>(getActiveDog);
   const [allDogs, setAllDogs] = useState<Dog[]>(getDogs);
   const [name, setName] = useState(dog?.name ?? '');
-  const [breed, setBreed] = useState(dog?.breed ?? '');
   const [goal, setGoal] = useState(dog?.goal ?? '');
   const [newDogName, setNewDogName] = useState('');
   const [syncing, setSyncing] = useState(false);
@@ -140,7 +139,7 @@ export default function SettingsPage() {
   }
 
   const handleSaveProfile = () => {
-    updateDog(d => ({ ...d, name: name.trim() || d.name, breed: breed.trim(), goal: goal.trim() || d.goal }));
+    updateDog(d => ({ ...d, name: name.trim() || d.name, goal: goal.trim() || d.goal }));
   };
 
   const handleAddDog = () => {
@@ -149,7 +148,6 @@ export default function SettingsPage() {
     const newDog: Dog = {
       id: crypto.randomUUID(),
       name: trimmed,
-      breed: '',
       targetBehaviors: [...DEFAULT_BEHAVIORS],
       stimulusOptions: [...DEFAULT_STIMULI],
       latencyOptions: [...DEFAULT_LATENCIES],
@@ -169,7 +167,6 @@ export default function SettingsPage() {
     setAllDogs(getDogs());
     if (switched) {
       setName(switched.name);
-      setBreed(switched.breed ?? '');
       setGoal(switched.goal);
     }
   };
@@ -213,15 +210,37 @@ export default function SettingsPage() {
               <span style={{ fontWeight: d.id === dog?.id ? 700 : 400 }}>
                 {d.id === dog?.id ? '✓ ' : ''}{d.name}
               </span>
-              {d.id !== dog?.id && (
-                <button
-                  className="btn btn-primary"
-                  style={{ minHeight: 36, padding: '6px 14px', fontSize: 13 }}
-                  onClick={() => handleSwitchDog(d.id)}
-                >
-                  切替
-                </button>
-              )}
+              <div style={{ display: 'flex', gap: 6 }}>
+                {d.id !== dog?.id && (
+                  <button
+                    className="btn btn-primary"
+                    style={{ minHeight: 36, padding: '6px 14px', fontSize: 13 }}
+                    onClick={() => handleSwitchDog(d.id)}
+                  >
+                    切替
+                  </button>
+                )}
+                {allDogs.length > 1 && (
+                  <button
+                    className="btn btn-danger"
+                    style={{ minHeight: 36, padding: '6px 10px', fontSize: 13 }}
+                    onClick={() => {
+                      if (!confirm(`「${d.name}」を削除しますか？`)) return;
+                      removeDog(d.id);
+                      const updated = getDogs();
+                      setAllDogs(updated);
+                      if (d.id === dog?.id && updated.length > 0) {
+                        const next = updated[0];
+                        setDog(next);
+                        setName(next.name);
+                        setGoal(next.goal);
+                      }
+                    }}
+                  >
+                    削除
+                  </button>
+                )}
+              </div>
             </div>
           ))}
           <div className="add-row" style={{ marginTop: 10 }}>
@@ -242,8 +261,6 @@ export default function SettingsPage() {
         <div className="card">
           <label className="label" style={{ marginTop: 0 }}>犬の名前</label>
           <input className="input" value={name} onChange={e => setName(e.target.value)} onBlur={handleSaveProfile} />
-          <label className="label">犬種</label>
-          <input className="input" placeholder="例: 柴犬" value={breed} onChange={e => setBreed(e.target.value)} onBlur={handleSaveProfile} />
           <label className="label">目標</label>
           <input className="input" value={goal} onChange={e => setGoal(e.target.value)} onBlur={handleSaveProfile} />
         </div>

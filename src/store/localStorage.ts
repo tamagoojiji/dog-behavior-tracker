@@ -37,6 +37,19 @@ export function saveDog(dog: Dog): void {
   setItem(KEYS.dogs, dogs);
 }
 
+export function removeDog(id: string): void {
+  const dogs = getDogs().filter(d => d.id !== id);
+  setItem(KEYS.dogs, dogs);
+  // アクティブ犬が削除された場合、別の犬に切替
+  if (getActiveDogId() === id) {
+    if (dogs.length > 0) {
+      localStorage.setItem(KEYS.activeDogId, dogs[0].id);
+    } else {
+      localStorage.removeItem(KEYS.activeDogId);
+    }
+  }
+}
+
 export function getActiveDogId(): string | null {
   return localStorage.getItem(KEYS.activeDogId);
 }

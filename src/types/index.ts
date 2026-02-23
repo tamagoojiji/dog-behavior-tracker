@@ -1,7 +1,6 @@
 export interface Dog {
   id: string;
   name: string;
-  breed: string;               // 犬種
   targetBehaviors: string[];
   stimulusOptions: string[];
   latencyOptions: number[];    // -1 = 反応なし
