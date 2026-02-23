@@ -1,16 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { getActiveDog, saveSession, saveEvent } from '../store/localStorage';
-import type { Session, BehaviorEvent } from '../types';
+import { getActiveDog, saveSession, saveEvent, updateEvent } from '../store/localStorage';
+import type { Session, BehaviorEvent, GeoPoint } from '../types';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useWakeLock } from '../hooks/useWakeLock';
 import ButtonGrid from '../components/ButtonGrid';
-import DistanceScroller from '../components/DistanceScroller';
 
 function formatTimer(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+// GPS距離計算（Haversine）
+function calcGpsDistance(p1: GeoPoint, p2: GeoPoint): number {
+  const R = 6371e3;
+  const toRad = (deg: number) => deg * Math.PI / 180;
+  const dLat = toRad(p2.lat - p1.lat);
+  const dLng = toRad(p2.lng - p1.lng);
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(p1.lat)) * Math.cos(toRad(p2.lat)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 export default function WalkPage() {
@@ -21,23 +31,24 @@ export default function WalkPage() {
   const startTimeRef = useRef(Date.now());
   const [elapsed, setElapsed] = useState(0);
 
-  const [stimulus, setStimulus] = useState<string | null>(null);
-  const [behavior, setBehavior] = useState<string | null>(null);
-  const [latency, setLatency] = useState<number | null>(null);
-  const [duration, setDuration] = useState<number | null>(null);
-  const [distance, setDistance] = useState<number | null>(null);
-  const [comment, setComment] = useState('');
-  const [isListening, setIsListening] = useState(false);
+  // 記録中状態
+  const [isRecording, setIsRecording] = useState(false);
+  const recordStartRef = useRef(0);
+  const recordStartPosRef = useRef<GeoPoint | null>(null);
+  const [recordDuration, setRecordDuration] = useState(0);
 
   const [eventCount, setEventCount] = useState(0);
-  const [successCount, setSuccessCount] = useState(0);
+
+  // 編集中のイベント（前回の記録）
+  const [pendingEvent, setPendingEvent] = useState<BehaviorEvent | null>(null);
+  const [editStimulus, setEditStimulus] = useState<string | null>(null);
+  const [editBehavior, setEditBehavior] = useState<string | null>(null);
+  const [editLatency, setEditLatency] = useState<number | null>(null);
 
   const { currentPosition, getPoints } = useGeolocation(true);
   useWakeLock(true);
 
-  const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null);
-
-  // タイマー
+  // 散歩タイマー
   useEffect(() => {
     const timer = setInterval(() => {
       setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
@@ -45,42 +56,94 @@ export default function WalkPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const resetSelection = useCallback(() => {
-    setStimulus(null);
-    setBehavior(null);
-    setLatency(null);
-    setDuration(null);
-    setDistance(null);
-    setComment('');
-    setIsListening(false);
-  }, []);
+  // 記録中タイマー
+  useEffect(() => {
+    if (!isRecording) return;
+    const timer = setInterval(() => {
+      setRecordDuration(Math.floor((Date.now() - recordStartRef.current) / 1000));
+    }, 200);
+    return () => clearInterval(timer);
+  }, [isRecording]);
 
-  const handleRecord = useCallback(() => {
-    if (!dog || !stimulus) return;
+  // 編集中のイベントを保存（内部ヘルパー）
+  const savePendingEdit = useCallback(() => {
+    if (!pendingEvent) return;
+    updateEvent({
+      ...pendingEvent,
+      stimulus: editStimulus ?? '',
+      behavior: editBehavior,
+      latency: editLatency,
+    });
+  }, [pendingEvent, editStimulus, editBehavior, editLatency]);
+
+  // 行動発生タップ
+  const handleStartRecord = useCallback(() => {
+    // 編集中のイベントがあれば保存してからスタート
+    if (pendingEvent) {
+      savePendingEdit();
+      setPendingEvent(null);
+    }
+    setIsRecording(true);
+    recordStartRef.current = Date.now();
+    recordStartPosRef.current = currentPosition;
+    setRecordDuration(0);
+  }, [pendingEvent, savePendingEdit, currentPosition]);
+
+  // 終了タップ
+  const handleEndRecord = useCallback(() => {
+    if (!dog) return;
+    const duration = Math.floor((Date.now() - recordStartRef.current) / 1000);
+    const startPos = recordStartPosRef.current;
+    const endPos = currentPosition;
+    const distance = startPos && endPos ? Math.round(calcGpsDistance(startPos, endPos)) : null;
 
     const event: BehaviorEvent = {
       id: crypto.randomUUID(),
       sessionId,
       dogId: dog.id,
-      timestamp: Date.now(),
-      elapsedSeconds: elapsed,
-      stimulus,
-      behavior,
-      latency,
+      timestamp: recordStartRef.current,
+      elapsedSeconds: Math.floor((recordStartRef.current - startTimeRef.current) / 1000),
+      stimulus: '',
+      behavior: null,
+      latency: null,
       duration,
       distance,
-      comment,
-      location: currentPosition,
+      comment: '',
+      location: startPos,
     };
 
     saveEvent(event);
     setEventCount(prev => prev + 1);
-    if (behavior === 'アイコンタクト') setSuccessCount(prev => prev + 1);
-    resetSelection();
-  }, [dog, sessionId, elapsed, stimulus, behavior, latency, duration, distance, comment, currentPosition, resetSelection]);
+    setIsRecording(false);
 
-  const handleEnd = useCallback(() => {
+    // 編集用にセット
+    setPendingEvent(event);
+    setEditStimulus(null);
+    setEditBehavior(null);
+    setEditLatency(null);
+  }, [dog, sessionId, currentPosition]);
+
+  // 誤タップ取消
+  const handleCancelRecord = useCallback(() => {
+    setIsRecording(false);
+    setRecordDuration(0);
+  }, []);
+
+  // 編集を保存して閉じる
+  const handleSaveEdit = useCallback(() => {
+    savePendingEdit();
+    setPendingEvent(null);
+  }, [savePendingEdit]);
+
+  // スキップ（編集せず閉じる）
+  const handleSkipEdit = useCallback(() => {
+    setPendingEvent(null);
+  }, []);
+
+  // 散歩終了
+  const handleEndWalk = useCallback(() => {
     if (!dog) return;
+    if (pendingEvent) savePendingEdit();
     const session: Session = {
       id: sessionId,
       dogId: dog.id,
@@ -92,139 +155,144 @@ export default function WalkPage() {
     };
     saveSession(session);
     navigate(`/walk-result/${sessionId}`);
-  }, [dog, sessionId, getPoints, navigate]);
-
-  const toggleSpeech = useCallback(() => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      return;
-    }
-    const recognition = createRecognition();
-    if (!recognition) return;
-    recognitionRef.current = recognition;
-    recognition.onresult = (e) => {
-      const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
-      setComment(prev => prev + transcript);
-    };
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
-    recognition.start();
-    setIsListening(true);
-  }, [isListening]);
+  }, [dog, sessionId, getPoints, navigate, pendingEvent, savePendingEdit]);
 
   if (!dog) {
     return <Navigate to="/login" replace />;
   }
 
-  const canRecord = !!stimulus;
-
   return (
     <div className="page" style={{ paddingBottom: 16 }}>
+      {/* ヘッダー: 散歩タイマー + 記録件数 */}
       <div className="walk-timer">{formatTimer(elapsed)}</div>
-
       <div className="walk-counter">
         <span>記録: <strong>{eventCount}</strong>件</span>
-        <span>アイコンタクト: <strong style={{ color: 'var(--success)' }}>{successCount}</strong></span>
       </div>
 
-      <div className="section-label">SD（刺激）</div>
-      <ButtonGrid options={dog.stimulusOptions} selected={stimulus} onSelect={setStimulus} columns={3} />
+      {isRecording ? (
+        /* === 計測中 === */
+        <div style={{ textAlign: 'center', marginTop: 20 }}>
+          <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 8 }}>
+            行動計測中...
+          </div>
+          <div style={{
+            fontSize: 56, fontWeight: 700,
+            fontVariantNumeric: 'tabular-nums',
+            color: 'var(--danger)',
+            padding: '16px 0',
+          }}>
+            {formatTimer(recordDuration)}
+          </div>
 
-      <div className="section-label">行動</div>
-      <ButtonGrid
-        options={dog.targetBehaviors}
-        selected={behavior}
-        onSelect={setBehavior}
-        columns={3}
-      />
+          <button
+            className="btn btn-danger btn-full"
+            style={{ marginTop: 20, minHeight: 80, fontSize: 24, borderRadius: 16 }}
+            onClick={handleEndRecord}
+          >
+            終了
+          </button>
 
-      <div className="section-label">行動が出るまでの時間</div>
-      <ButtonGrid
-        options={dog.latencyOptions.map(l => l === -1 ? 'なし' : `${l}秒`)}
-        selected={latency === null ? null : latency === -1 ? 'なし' : `${latency}秒`}
-        onSelect={v => setLatency(v === 'なし' ? -1 : Number(v.replace('秒', '')))}
-        columns={4}
-      />
+          <button
+            className="btn btn-full"
+            style={{
+              marginTop: 12,
+              background: 'var(--bg)',
+              border: '2px solid var(--border)',
+              color: 'var(--text-secondary)',
+            }}
+            onClick={handleCancelRecord}
+          >
+            誤タップ取消
+          </button>
+        </div>
+      ) : (
+        /* === 待機中 === */
+        <>
+          <button
+            className="btn btn-primary btn-full"
+            style={{
+              marginTop: 16,
+              minHeight: 88,
+              fontSize: 24,
+              borderRadius: 16,
+              letterSpacing: 2,
+            }}
+            onClick={handleStartRecord}
+          >
+            行動発生
+          </button>
 
-      <div className="section-label">行動の持続時間</div>
-      <ButtonGrid
-        options={dog.durationOptions.map(d => `${d}秒`)}
-        selected={duration === null ? null : `${duration}秒`}
-        onSelect={v => setDuration(Number(v.replace('秒', '')))}
-        columns={4}
-      />
+          {/* 前回の記録を編集 */}
+          {pendingEvent && (
+            <div className="card" style={{ marginTop: 16 }}>
+              <div style={{
+                display: 'flex', justifyContent: 'space-between',
+                alignItems: 'center', marginBottom: 8,
+              }}>
+                <strong style={{ fontSize: 14 }}>前回の記録を編集</strong>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                  {pendingEvent.duration != null ? `${pendingEvent.duration}秒` : ''}
+                  {pendingEvent.distance != null ? ` / ${pendingEvent.distance}m` : ''}
+                </span>
+              </div>
 
-      <div className="section-label">刺激との距離</div>
-      <DistanceScroller options={dog.distanceOptions} selected={distance} onSelect={setDistance} />
+              <div className="section-label" style={{ marginTop: 4 }}>SD（刺激）</div>
+              <ButtonGrid
+                options={dog.stimulusOptions}
+                selected={editStimulus}
+                onSelect={setEditStimulus}
+                columns={3}
+              />
 
-      <div className="section-label">コメント</div>
-      <div className="comment-input-wrap">
-        <textarea
-          className="input"
-          placeholder="メモ..."
-          value={comment}
-          onChange={e => setComment(e.target.value)}
-          rows={2}
-          style={{ minHeight: 48 }}
-        />
-        <button
-          type="button"
-          className={`mic-btn ${isListening ? 'listening' : ''}`}
-          onClick={toggleSpeech}
-          aria-label="音声入力"
-        >
-          🎤
-        </button>
-      </div>
+              <div className="section-label">行動</div>
+              <ButtonGrid
+                options={dog.targetBehaviors}
+                selected={editBehavior}
+                onSelect={setEditBehavior}
+                columns={3}
+              />
+
+              <div className="section-label">行動が出るまでの時間</div>
+              <ButtonGrid
+                options={dog.latencyOptions.map(l => l === -1 ? 'なし' : `${l}秒`)}
+                selected={editLatency === null ? null : editLatency === -1 ? 'なし' : `${editLatency}秒`}
+                onSelect={v => setEditLatency(v === 'なし' ? -1 : Number(v.replace('秒', '')))}
+                columns={4}
+              />
+
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <button
+                  className="btn btn-success"
+                  style={{ flex: 1 }}
+                  onClick={handleSaveEdit}
+                >
+                  保存
+                </button>
+                <button
+                  className="btn"
+                  style={{ flex: 1, background: 'var(--bg)', border: '2px solid var(--border)', color: 'var(--text-secondary)' }}
+                  onClick={handleSkipEdit}
+                >
+                  スキップ
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       <button
-        className="btn btn-primary btn-full btn-lg"
-        style={{ marginTop: 16 }}
-        onClick={handleRecord}
-        disabled={!canRecord}
-      >
-        記録する
-      </button>
-
-      <button
-        className="btn btn-danger btn-full"
-        style={{ marginTop: 12 }}
-        onClick={handleEnd}
+        className="btn btn-full"
+        style={{
+          marginTop: 24,
+          background: 'var(--bg)',
+          border: '2px solid var(--danger)',
+          color: 'var(--danger)',
+        }}
+        onClick={handleEndWalk}
       >
         記録終了
       </button>
     </div>
   );
-}
-
-interface SpeechRecognitionResult {
-  readonly [index: number]: { transcript: string };
-}
-interface SpeechRecognitionResultList {
-  readonly length: number;
-  [Symbol.iterator](): Iterator<SpeechRecognitionResult>;
-}
-interface SpeechRecognitionInstance {
-  lang: string;
-  interimResults: boolean;
-  continuous: boolean;
-  onresult: ((e: { results: SpeechRecognitionResultList }) => void) | null;
-  onend: (() => void) | null;
-  onerror: (() => void) | null;
-  start(): void;
-  stop(): void;
-}
-
-function createRecognition(): SpeechRecognitionInstance | null {
-  const w = window as unknown as Record<string, unknown>;
-  const SR = (w.webkitSpeechRecognition ?? w.SpeechRecognition) as
-    | (new () => SpeechRecognitionInstance)
-    | undefined;
-  if (!SR) return null;
-  const r = new SR();
-  r.lang = 'ja-JP';
-  r.interimResults = false;
-  r.continuous = false;
-  return r;
 }
