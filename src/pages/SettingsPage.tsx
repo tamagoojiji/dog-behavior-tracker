@@ -6,7 +6,7 @@ import { DEFAULT_STIMULI, DEFAULT_BEHAVIORS, DEFAULT_LATENCIES, DEFAULT_DURATION
 import { generateTestData } from '../store/testData';
 import {
   getSyncConfig, clearSyncConfig, getLastSync, getSyncQueueCount,
-  syncAll, getGasUrl, setGasUrl,
+  syncAll, getGasUrl,
 } from '../store/syncService';
 
 function CheckboxStringList({
@@ -123,7 +123,6 @@ export default function SettingsPage() {
   const [newDogName, setNewDogName] = useState('');
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
-  const [gasUrlInput, setGasUrlInput] = useState(getGasUrl());
   const [syncConnected, setSyncConnected] = useState(!!getSyncConfig());
 
   const updateDog = useCallback((updater: (d: Dog) => Dog) => {
@@ -366,24 +365,6 @@ export default function SettingsPage() {
               )}
             </>
           )}
-        </div>
-      </div>
-
-      <div className="setting-group">
-        <div className="setting-title">接続設定</div>
-        <div className="card">
-          <label className="label" style={{ marginTop: 0 }}>GAS Web App URL</label>
-          <input
-            className="input"
-            placeholder="https://script.google.com/macros/s/..."
-            value={gasUrlInput}
-            onChange={e => setGasUrlInput(e.target.value)}
-            onBlur={() => setGasUrl(gasUrlInput.trim())}
-            style={{ fontSize: 12 }}
-          />
-          <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4 }}>
-            指導者から共有されたURLを入力してください
-          </p>
         </div>
       </div>
 

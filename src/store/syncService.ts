@@ -3,7 +3,7 @@
  * GAS Web App とのデータ同期・キュー管理
  */
 
-import type { Instructor, AdminInstructor, SyncConfig, SyncQueueItem, Dog, Session, BehaviorEvent } from '../types';
+import type { Instructor, AdminInstructor, AdminUser, SyncConfig, SyncQueueItem, Dog, Session, BehaviorEvent } from '../types';
 import { getDogs, getSessions, getEvents } from './localStorage';
 
 const KEYS = {
@@ -120,6 +120,41 @@ export async function fetchAdminInstructors(password: string): Promise<AdminInst
     error?: { message: string };
   };
   if (!result.success) throw new Error(result.error?.message || '取得失敗');
+  return result.data;
+}
+
+/**
+ * ユーザー一覧を取得（Admin用）
+ */
+export async function fetchAdminUsers(password: string): Promise<AdminUser[]> {
+  const result = await fetchGasGet('?action=getAdminUsers&password=' + encodeURIComponent(password)) as {
+    success: boolean;
+    data: AdminUser[];
+    error?: { message: string };
+  };
+  if (!result.success) throw new Error(result.error?.message || '取得失敗');
+  return result.data;
+}
+
+/**
+ * ユーザーの指導者を変更（Admin用）
+ */
+export async function changeUserInstructor(
+  emailHash: string,
+  newInstructorId: string,
+  password: string,
+): Promise<{ instructorId: string; instructorName: string }> {
+  const result = await fetchGasPost({
+    action: 'changeUserInstructor',
+    emailHash,
+    newInstructorId,
+    adminPassword: password,
+  }) as {
+    success: boolean;
+    data: { instructorId: string; instructorName: string };
+    error?: { message: string };
+  };
+  if (!result.success) throw new Error(result.error?.message || '変更失敗');
   return result.data;
 }
 

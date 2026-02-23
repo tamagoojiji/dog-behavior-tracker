@@ -4,7 +4,7 @@ import type { Dog, Instructor } from '../types';
 import { DEFAULT_STIMULI, DEFAULT_BEHAVIORS, DEFAULT_LATENCIES, DEFAULT_DURATIONS, DEFAULT_DISTANCES } from '../types';
 import { getDogs, saveDog, setActiveDogId } from '../store/localStorage';
 import {
-  getGasUrl, getSyncConfig, setSyncConfig,
+  getGasUrl, setGasUrl, getSyncConfig, setSyncConfig,
   fetchInstructors, hashEmailOnServer, checkUserExists, registerUser,
 } from '../store/syncService';
 
@@ -14,7 +14,6 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const dogs = getDogs();
   const hasSyncConfig = !!getSyncConfig();
-  const hasGasUrl = !!getGasUrl();
 
   // 初期ステップ: 犬がいなければ新規犬作成、いれば選択
   const [step, setStep] = useState<Step>(dogs.length === 0 ? 'newDog' : 'selectDog');
@@ -24,23 +23,40 @@ export default function LoginPage() {
   const [goal, setGoal] = useState('');
 
   // 同期設定
+  const [gasUrlInput, setGasUrlInput] = useState(getGasUrl());
   const [email, setEmail] = useState('');
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [selectedInstructorId, setSelectedInstructorId] = useState('');
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncError, setSyncError] = useState('');
   const [syncStep, setSyncStep] = useState<'email' | 'register' | 'done'>('email');
+  const [urlLoading, setUrlLoading] = useState(false);
 
-  // 指導者リスト取得
+  // 起動時にGAS URL設定済みなら指導者リスト取得
   useEffect(() => {
-    if (!hasGasUrl) return;
-    fetchInstructors()
-      .then(list => {
-        setInstructors(list);
-        if (list.length > 0) setSelectedInstructorId(list[0].id);
-      })
-      .catch(() => { /* GAS未設定ならスキップ */ });
-  }, [hasGasUrl]);
+    if (getGasUrl()) loadInstructors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function loadInstructors() {
+    try {
+      setUrlLoading(true);
+      const list = await fetchInstructors();
+      setInstructors(list);
+      if (list.length > 0) setSelectedInstructorId(list[0].id);
+    } catch {
+      // 取得失敗時はスキップ
+    } finally {
+      setUrlLoading(false);
+    }
+  }
+
+  async function handleSaveGasUrl() {
+    const trimmed = gasUrlInput.trim();
+    if (!trimmed) return;
+    setGasUrl(trimmed);
+    await loadInstructors();
+  }
 
   const handleSelectDog = (dog: Dog) => {
     setActiveDogId(dog.id);
@@ -62,8 +78,8 @@ export default function LoginPage() {
     saveDog(dog);
     setActiveDogId(dog.id);
 
-    // GAS設定がある場合、同期セットアップへ
-    if (hasGasUrl && !hasSyncConfig) {
+    // GAS URL設定済み & 同期未設定 → 指導者連携へ
+    if (getGasUrl() && !hasSyncConfig) {
       setStep('setupSync');
       return;
     }
@@ -148,48 +164,76 @@ export default function LoginPage() {
         </div>
 
         <div className="card">
-          <label className="label" style={{ marginTop: 0 }}>メールアドレス</label>
-          <input
-            className="input"
-            type="email"
-            placeholder="example@email.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            autoFocus
-          />
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
-            ※ メールアドレスは暗号化されて送信されます。サーバーに生データは保存されません。
-          </p>
-
-          {instructors.length > 0 && (
+          {/* GAS URL未設定の場合は入力欄を表示 */}
+          {!getGasUrl() && (
             <>
-              <label className="label">指導者を選択</label>
-              <select
-                className="input"
-                value={selectedInstructorId}
-                onChange={e => setSelectedInstructorId(e.target.value)}
-              >
-                {instructors.map(inst => (
-                  <option key={inst.id} value={inst.id}>{inst.name}</option>
-                ))}
-              </select>
+              <label className="label" style={{ marginTop: 0 }}>接続URL</label>
+              <div className="add-row">
+                <input
+                  className="input"
+                  placeholder="指導者から共有されたURL"
+                  value={gasUrlInput}
+                  onChange={e => setGasUrlInput(e.target.value)}
+                  style={{ fontSize: 12 }}
+                />
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSaveGasUrl}
+                  disabled={urlLoading || !gasUrlInput.trim()}
+                >
+                  {urlLoading ? '...' : '接続'}
+                </button>
+              </div>
             </>
           )}
 
-          {syncError && (
-            <div style={{ color: 'var(--danger)', fontSize: 13, marginTop: 8, padding: '8px', background: '#fff5f5', borderRadius: 6 }}>
-              {syncError}
-            </div>
-          )}
+          {/* GAS URL設定済み → メール + 指導者選択 */}
+          {getGasUrl() && (
+            <>
+              <label className="label" style={{ marginTop: getGasUrl() ? 0 : undefined }}>メールアドレス</label>
+              <input
+                className="input"
+                type="email"
+                placeholder="example@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                autoFocus
+              />
+              <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                ※ メールアドレスは暗号化されて送信されます
+              </p>
 
-          <button
-            className="btn btn-primary btn-full btn-lg"
-            style={{ marginTop: 16 }}
-            onClick={handleSyncSetup}
-            disabled={syncLoading || !email.trim() || !selectedInstructorId}
-          >
-            {syncLoading ? '接続中...' : '登録する'}
-          </button>
+              {instructors.length > 0 && (
+                <>
+                  <label className="label">指導者を選択</label>
+                  <select
+                    className="input"
+                    value={selectedInstructorId}
+                    onChange={e => setSelectedInstructorId(e.target.value)}
+                  >
+                    {instructors.map(inst => (
+                      <option key={inst.id} value={inst.id}>{inst.name}</option>
+                    ))}
+                  </select>
+                </>
+              )}
+
+              {syncError && (
+                <div style={{ color: 'var(--danger)', fontSize: 13, marginTop: 8, padding: '8px', background: '#fff5f5', borderRadius: 6 }}>
+                  {syncError}
+                </div>
+              )}
+
+              <button
+                className="btn btn-primary btn-full btn-lg"
+                style={{ marginTop: 16 }}
+                onClick={handleSyncSetup}
+                disabled={syncLoading || !email.trim() || !selectedInstructorId}
+              >
+                {syncLoading ? '接続中...' : '登録する'}
+              </button>
+            </>
+          )}
 
           <button
             className="btn btn-full"

@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
-import type { AdminInstructor } from '../types';
-import { fetchAdminInstructors, addInstructor, getGasUrl, setGasUrl } from '../store/syncService';
+import type { AdminInstructor, AdminUser } from '../types';
+import {
+  fetchAdminInstructors, fetchAdminUsers, addInstructor,
+  changeUserInstructor, getGasUrl, setGasUrl,
+} from '../store/syncService';
 
 const SESSION_KEY = 'dbt_admin_password';
 
@@ -9,13 +12,15 @@ export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [authError, setAuthError] = useState('');
   const [instructors, setInstructors] = useState<AdminInstructor[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [newName, setNewName] = useState('');
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState('');
   const [gasUrlInput, setGasUrlInput] = useState(getGasUrl());
+  const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [changingInstructor, setChangingInstructor] = useState(false);
 
-  // sessionStorageからパスワードを復元
   useEffect(() => {
     const saved = sessionStorage.getItem(SESSION_KEY);
     if (saved && getGasUrl()) {
@@ -46,10 +51,14 @@ export default function AdminPage() {
     setLoading(true);
     setAuthError('');
     try {
-      const list = await fetchAdminInstructors(pass);
+      const [instList, userList] = await Promise.all([
+        fetchAdminInstructors(pass),
+        fetchAdminUsers(pass),
+      ]);
       sessionStorage.setItem(SESSION_KEY, pass);
       setAuthenticated(true);
-      setInstructors(list);
+      setInstructors(instList);
+      setUsers(userList);
     } catch (err) {
       setAuthError(err instanceof Error ? err.message : '認証に失敗しました');
       sessionStorage.removeItem(SESSION_KEY);
@@ -77,13 +86,31 @@ export default function AdminPage() {
     }
   }
 
-  // 未認証: パスワード入力画面
+  async function handleChangeInstructor(emailHash: string, newInstructorId: string) {
+    setChangingInstructor(true);
+    try {
+      await changeUserInstructor(emailHash, newInstructorId, getStoredPassword());
+      // リスト更新
+      const [instList, userList] = await Promise.all([
+        fetchAdminInstructors(getStoredPassword()),
+        fetchAdminUsers(getStoredPassword()),
+      ]);
+      setInstructors(instList);
+      setUsers(userList);
+      setEditingUser(null);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '変更に失敗しました');
+    } finally {
+      setChangingInstructor(false);
+    }
+  }
+
+  // 未認証
   if (!authenticated) {
     return (
       <div className="page">
         <h1 className="page-title">管理</h1>
 
-        {/* GAS URL未設定時は入力欄を表示 */}
         {!getGasUrl() && (
           <div className="setting-group">
             <div className="setting-title">接続設定</div>
@@ -137,7 +164,7 @@ export default function AdminPage() {
     );
   }
 
-  // 認証済み: 管理画面
+  // 認証済み
   return (
     <div className="page">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -148,6 +175,7 @@ export default function AdminPage() {
             setAuthenticated(false);
             setPassword('');
             setInstructors([]);
+            setUsers([]);
           }}
           style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer' }}
         >
@@ -182,16 +210,13 @@ export default function AdminPage() {
             </div>
           ))
         )}
-      </div>
 
-      {/* 指導者追加フォーム */}
-      <div className="setting-group">
-        <div className="setting-title">指導者を追加</div>
+        {/* 指導者追加フォーム */}
         <div className="card">
           <div className="add-row">
             <input
               className="input"
-              placeholder="指導者名"
+              placeholder="指導者名を入力"
               value={newName}
               onChange={e => setNewName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAdd()}
@@ -214,6 +239,71 @@ export default function AdminPage() {
             </p>
           )}
         </div>
+      </div>
+
+      {/* ユーザー管理 */}
+      <div className="setting-group">
+        <div className="setting-title">ユーザー一覧（{users.length}名）</div>
+        {users.length === 0 ? (
+          <div className="card">
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', textAlign: 'center' }}>
+              ユーザーがまだ登録されていません
+            </p>
+          </div>
+        ) : (
+          users.map(user => (
+            <div className="card" key={user.emailHash}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: 15 }}>{user.dogName}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
+                    指導者: {user.instructorName}
+                  </div>
+                  {user.lastSync && (
+                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
+                      最終同期: {new Date(user.lastSync).toLocaleDateString('ja-JP')}
+                    </div>
+                  )}
+                </div>
+                <button
+                  className="btn"
+                  style={{ minHeight: 36, padding: '6px 12px', fontSize: 12, color: 'var(--primary)', border: '1px solid var(--border)' }}
+                  onClick={() => setEditingUser(editingUser === user.emailHash ? null : user.emailHash)}
+                >
+                  変更
+                </button>
+              </div>
+
+              {/* 指導者変更UI */}
+              {editingUser === user.emailHash && (
+                <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                  <label className="label" style={{ marginTop: 0 }}>新しい指導者を選択</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {instructors
+                      .filter(inst => inst.id !== user.instructorId)
+                      .map(inst => (
+                        <button
+                          key={inst.id}
+                          className="btn"
+                          style={{
+                            minHeight: 40,
+                            padding: '8px 14px',
+                            fontSize: 14,
+                            border: '1px solid var(--border)',
+                            justifyContent: 'flex-start',
+                          }}
+                          onClick={() => handleChangeInstructor(user.emailHash, inst.id)}
+                          disabled={changingInstructor}
+                        >
+                          {changingInstructor ? '...' : inst.name}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -58,6 +58,15 @@ export interface AdminInstructor {
   userCount: number;
 }
 
+export interface AdminUser {
+  emailHash: string;
+  dogName: string;
+  instructorId: string;
+  instructorName: string;
+  created: string;
+  lastSync: string;
+}
+
 export interface SyncConfig {
   emailHash: string;
   instructorId: string;
