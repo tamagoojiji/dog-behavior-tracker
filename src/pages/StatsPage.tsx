@@ -83,7 +83,74 @@ export default function StatsPage() {
     // 合計回数順にソート
     const sortedBehaviors = Object.entries(byBehavior).sort((a, b) => b[1].total - a[1].total);
 
-    return { count, avgLatency, avgDistance, sessionCount: sessions.length, byStimulus, sortedBehaviors };
+    // 今週のデータ
+    const weekStart = (() => {
+      const now = new Date();
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(now.getFullYear(), now.getMonth(), diff, 0, 0, 0, 0).getTime();
+    })();
+    const weekEvents = events.filter(e => e.timestamp >= weekStart);
+    const weekSessions = sessions.filter(s => s.startTime >= weekStart);
+
+    // 自動コメント生成
+    const comments: string[] = [];
+
+    if (weekEvents.length > 0) {
+      comments.push(`今週は合計${weekEvents.length}件の記録がありました（${weekSessions.length}回の散歩）。`);
+
+      // 最多行動
+      const weekBehaviorCount: Record<string, number> = {};
+      for (const e of weekEvents) {
+        if (e.behavior) {
+          weekBehaviorCount[e.behavior] = (weekBehaviorCount[e.behavior] || 0) + 1;
+        }
+      }
+      const topBehavior = Object.entries(weekBehaviorCount).sort((a, b) => b[1] - a[1])[0];
+      if (topBehavior) {
+        comments.push(`最も多い行動は「${topBehavior[0]}」（${topBehavior[1]}件）でした。`);
+      }
+
+      // 平均潜時
+      const weekLatencies = weekEvents.filter(e => e.latency !== null && e.latency >= 0).map(e => e.latency!);
+      if (weekLatencies.length > 0) {
+        const weekAvgLat = +(weekLatencies.reduce((a, b) => a + b, 0) / weekLatencies.length).toFixed(1);
+        comments.push(`平均反応潜時は${weekAvgLat}秒です。`);
+      }
+
+      // 平均距離
+      const weekDistances = weekEvents.filter(e => e.distance !== null).map(e => e.distance!);
+      if (weekDistances.length > 0) {
+        const weekAvgDist = Math.round(weekDistances.reduce((a, b) => a + b, 0) / weekDistances.length);
+        comments.push(`主な発生距離は${weekAvgDist}m付近でした。`);
+      }
+
+      // SD別アイコンタクト率の最高・最低
+      const weekByStimulus: Record<string, { total: number; success: number }> = {};
+      for (const e of weekEvents) {
+        if (!e.stimulus) continue;
+        if (!weekByStimulus[e.stimulus]) weekByStimulus[e.stimulus] = { total: 0, success: 0 };
+        weekByStimulus[e.stimulus].total++;
+        if (e.behavior === 'アイコンタクト') weekByStimulus[e.stimulus].success++;
+      }
+      const sdRates = Object.entries(weekByStimulus)
+        .filter(([, d]) => d.total >= 2)
+        .map(([sd, d]) => ({ sd, rate: Math.round((d.success / d.total) * 100), total: d.total }));
+      if (sdRates.length > 0) {
+        const best = sdRates.sort((a, b) => b.rate - a.rate)[0];
+        const worst = sdRates.sort((a, b) => a.rate - b.rate)[0];
+        if (best.rate > 0) {
+          comments.push(`アイコンタクト率が最も高いのは「${best.sd}」で${best.rate}%でした。`);
+        }
+        if (worst.sd !== best.sd && worst.rate < best.rate) {
+          comments.push(`「${worst.sd}」は${worst.rate}%と課題が残ります。`);
+        }
+      }
+    } else {
+      comments.push('今週はまだ記録がありません。散歩に出かけましょう！');
+    }
+
+    return { count, avgLatency, avgDistance, sessionCount: sessions.length, byStimulus, sortedBehaviors, comments };
   }, [dog?.id]);
 
   const handleCsvDownload = useCallback(() => {
@@ -136,6 +203,13 @@ export default function StatsPage() {
       >
         CSVダウンロード
       </button>
+
+      <div className="section-label">今週のコメント</div>
+      <div className="card" style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--text)' }}>
+        {stats.comments.map((c, i) => (
+          <p key={i} style={{ margin: i === 0 ? 0 : '4px 0 0' }}>{c}</p>
+        ))}
+      </div>
 
       <div className="section-label">全体サマリー（{stats.sessionCount}回の散歩）</div>
       <SummaryCard count={stats.count} avgLatency={stats.avgLatency} avgDistance={stats.avgDistance} />
