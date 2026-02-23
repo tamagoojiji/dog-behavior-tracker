@@ -133,7 +133,7 @@ export default function WalkPage() {
 
       <div className="section-label">行動</div>
       <ButtonGrid
-        options={stimulus ? (dog.behaviorsByStimulus?.[stimulus] ?? dog.targetBehaviors) : dog.targetBehaviors}
+        options={dog.targetBehaviors}
         selected={behavior}
         onSelect={setBehavior}
         columns={3}

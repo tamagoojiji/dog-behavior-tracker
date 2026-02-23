@@ -121,12 +121,9 @@ export function migrateData(): void {
       dog.durationOptions = [...DEFAULT_DURATIONS];
       changed = true;
     }
-    // behaviorsByStimulus が未設定 → 全SDに全行動を割り当て
-    if (!dog.behaviorsByStimulus) {
-      dog.behaviorsByStimulus = {};
-      for (const sd of dog.stimulusOptions) {
-        dog.behaviorsByStimulus[sd] = [...dog.targetBehaviors];
-      }
+    // behaviorsByStimulus を削除（不要になった）
+    if ('behaviorsByStimulus' in dog) {
+      delete (dog as Record<string, unknown>).behaviorsByStimulus;
       changed = true;
     }
   }

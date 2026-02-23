@@ -49,7 +49,7 @@ function createRecognition(): SpeechRecognitionInstance | null {
   return r;
 }
 
-function EventEditor({ event, dog, onSave }: { event: BehaviorEvent; dog: { targetBehaviors: string[]; behaviorsByStimulus?: Record<string, string[]>; latencyOptions: number[]; durationOptions: number[]; distanceOptions: number[] }; onSave: (e: BehaviorEvent) => void }) {
+function EventEditor({ event, dog, onSave }: { event: BehaviorEvent; dog: { targetBehaviors: string[]; latencyOptions: number[]; durationOptions: number[]; distanceOptions: number[] }; onSave: (e: BehaviorEvent) => void }) {
   const [behavior, setBehavior] = useState(event.behavior);
   const [latency, setLatency] = useState(event.latency);
   const [duration, setDuration] = useState(event.duration ?? null);
@@ -85,7 +85,7 @@ function EventEditor({ event, dog, onSave }: { event: BehaviorEvent; dog: { targ
     <div className="event-editor">
       <div className="section-label" style={{ marginTop: 4 }}>行動</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-        {(dog.behaviorsByStimulus?.[event.stimulus] ?? dog.targetBehaviors).map(b => (
+        {dog.targetBehaviors.map(b => (
           <button
             key={b}
             className={`btn-option ${behavior === b ? 'selected' : ''}`}

@@ -5,12 +5,22 @@ import type { Dog } from '../types';
 import { DEFAULT_STIMULI, DEFAULT_BEHAVIORS, DEFAULT_LATENCIES, DEFAULT_DURATIONS, DEFAULT_DISTANCES } from '../types';
 import { generateTestData } from '../store/testData';
 
-function AddableList({ title, items, onAdd }: { title: string; items: string[]; onAdd: (item: string) => void }) {
+function CheckboxStringList({
+  title, active, defaults, onToggle, onAdd,
+}: {
+  title: string;
+  active: string[];
+  defaults: string[];
+  onToggle: (item: string, checked: boolean) => void;
+  onAdd: (item: string) => void;
+}) {
   const [value, setValue] = useState('');
+  // デフォルト + カスタム（activeに含まれるがdefaultsにない）
+  const allItems = [...defaults, ...active.filter(i => !defaults.includes(i))];
 
   const handleAdd = () => {
     const trimmed = value.trim();
-    if (!trimmed || items.includes(trimmed)) return;
+    if (!trimmed || allItems.includes(trimmed)) return;
     onAdd(trimmed);
     setValue('');
   };
@@ -18,31 +28,52 @@ function AddableList({ title, items, onAdd }: { title: string; items: string[]; 
   return (
     <div className="setting-group">
       <div className="setting-title">{title}</div>
-      <div className="tag-list">
-        {items.map(item => (
-          <span key={item} className="tag">{item}</span>
-        ))}
-      </div>
-      <div className="add-row">
-        <input
-          className="input"
-          placeholder="追加..."
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleAdd()}
-        />
-        <button className="btn btn-primary" onClick={handleAdd}>追加</button>
+      <div className="card">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          {allItems.map(item => (
+            <label key={item} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, minWidth: '45%' }}>
+              <input
+                type="checkbox"
+                checked={active.includes(item)}
+                onChange={e => onToggle(item, e.target.checked)}
+              />
+              {item}
+            </label>
+          ))}
+        </div>
+        <div className="add-row" style={{ marginTop: 10 }}>
+          <input
+            className="input"
+            placeholder="追加..."
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          />
+          <button className="btn btn-primary" onClick={handleAdd}>追加</button>
+        </div>
       </div>
     </div>
   );
 }
 
-function AddableNumberList({ title, items, unit, onAdd }: { title: string; items: number[]; unit: string; onAdd: (item: number) => void }) {
+function CheckboxNumberList({
+  title, active, defaults, unit, onToggle, onAdd,
+}: {
+  title: string;
+  active: number[];
+  defaults: number[];
+  unit: string;
+  onToggle: (item: number, checked: boolean) => void;
+  onAdd: (item: number) => void;
+}) {
   const [value, setValue] = useState('');
+  const allItems = [...new Set([...defaults, ...active])].sort((a, b) => a - b);
+
+  const formatLabel = (n: number) => n === -1 ? 'なし' : `${n}${unit}`;
 
   const handleAdd = () => {
     const num = Number(value);
-    if (isNaN(num) || items.includes(num)) return;
+    if (isNaN(num) || allItems.includes(num)) return;
     onAdd(num);
     setValue('');
   };
@@ -50,77 +81,30 @@ function AddableNumberList({ title, items, unit, onAdd }: { title: string; items
   return (
     <div className="setting-group">
       <div className="setting-title">{title}</div>
-      <div className="tag-list">
-        {items.map(item => (
-          <span key={item} className="tag">{item === -1 ? 'なし' : `${item}${unit}`}</span>
-        ))}
-      </div>
-      <div className="add-row">
-        <input
-          className="input"
-          type="number"
-          placeholder="追加..."
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleAdd()}
-        />
-        <button className="btn btn-primary" onClick={handleAdd}>追加</button>
-      </div>
-    </div>
-  );
-}
-
-function BehaviorByStimulus({ dog, updateDog }: { dog: Dog; updateDog: (updater: (d: Dog) => Dog) => void }) {
-  const [openSd, setOpenSd] = useState<string | null>(null);
-
-  const toggle = (sd: string, behavior: string, checked: boolean) => {
-    updateDog(d => {
-      const current = d.behaviorsByStimulus[sd] ?? [...d.targetBehaviors];
-      const next = checked
-        ? [...current, behavior]
-        : current.filter(b => b !== behavior);
-      return { ...d, behaviorsByStimulus: { ...d.behaviorsByStimulus, [sd]: next } };
-    });
-  };
-
-  return (
-    <div className="setting-group">
-      <div className="setting-title">SDごとの行動テンプレート</div>
-      <div className="card" style={{ padding: 0 }}>
-        {dog.stimulusOptions.map(sd => {
-          const isOpen = openSd === sd;
-          const behaviors = dog.behaviorsByStimulus[sd] ?? dog.targetBehaviors;
-          return (
-            <div key={sd}>
-              <div
-                style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid var(--border)',
-                }}
-                onClick={() => setOpenSd(isOpen ? null : sd)}
-              >
-                <span style={{ fontWeight: 600 }}>{sd}</span>
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                  {behaviors.length}/{dog.targetBehaviors.length} {isOpen ? '▲' : '▼'}
-                </span>
-              </div>
-              {isOpen && (
-                <div style={{ padding: '8px 14px 12px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {dog.targetBehaviors.map(b => (
-                    <label key={b} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14 }}>
-                      <input
-                        type="checkbox"
-                        checked={behaviors.includes(b)}
-                        onChange={e => toggle(sd, b, e.target.checked)}
-                      />
-                      {b}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+      <div className="card">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          {allItems.map(item => (
+            <label key={item} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, minWidth: '30%' }}>
+              <input
+                type="checkbox"
+                checked={active.includes(item)}
+                onChange={e => onToggle(item, e.target.checked)}
+              />
+              {formatLabel(item)}
+            </label>
+          ))}
+        </div>
+        <div className="add-row" style={{ marginTop: 10 }}>
+          <input
+            className="input"
+            type="number"
+            placeholder="追加..."
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          />
+          <button className="btn btn-primary" onClick={handleAdd}>追加</button>
+        </div>
       </div>
     </div>
   );
@@ -153,18 +137,11 @@ export default function SettingsPage() {
   const handleAddDog = () => {
     const trimmed = newDogName.trim();
     if (!trimmed) return;
-    const defaultBehaviors = [...DEFAULT_BEHAVIORS];
-    const defaultStimuli = [...DEFAULT_STIMULI];
-    const behaviorsByStimulus: Record<string, string[]> = {};
-    for (const sd of defaultStimuli) {
-      behaviorsByStimulus[sd] = [...defaultBehaviors];
-    }
     const newDog: Dog = {
       id: crypto.randomUUID(),
       name: trimmed,
-      targetBehaviors: defaultBehaviors,
-      stimulusOptions: defaultStimuli,
-      behaviorsByStimulus,
+      targetBehaviors: [...DEFAULT_BEHAVIORS],
+      stimulusOptions: [...DEFAULT_STIMULI],
       latencyOptions: [...DEFAULT_LATENCIES],
       durationOptions: [...DEFAULT_DURATIONS],
       distanceOptions: [...DEFAULT_DISTANCES],
@@ -185,6 +162,24 @@ export default function SettingsPage() {
       setGoal(switched.goal);
     }
   };
+
+  const toggleString = (field: 'stimulusOptions' | 'targetBehaviors') =>
+    (item: string, checked: boolean) => {
+      updateDog(d => ({
+        ...d,
+        [field]: checked ? [...d[field], item] : d[field].filter(i => i !== item),
+      }));
+    };
+
+  const toggleNumber = (field: 'latencyOptions' | 'durationOptions' | 'distanceOptions') =>
+    (item: number, checked: boolean) => {
+      updateDog(d => ({
+        ...d,
+        [field]: checked
+          ? [...d[field], item].sort((a, b) => a - b)
+          : d[field].filter(i => i !== item),
+      }));
+    };
 
   return (
     <div className="page">
@@ -241,48 +236,46 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <AddableList
+      <CheckboxStringList
         title="SD（刺激）候補"
-        items={dog.stimulusOptions}
-        onAdd={item => updateDog(d => ({
-          ...d,
-          stimulusOptions: [...d.stimulusOptions, item],
-          behaviorsByStimulus: { ...d.behaviorsByStimulus, [item]: [...d.targetBehaviors] },
-        }))}
+        active={dog.stimulusOptions}
+        defaults={DEFAULT_STIMULI}
+        onToggle={toggleString('stimulusOptions')}
+        onAdd={item => updateDog(d => ({ ...d, stimulusOptions: [...d.stimulusOptions, item] }))}
       />
 
-      <AddableList
+      <CheckboxStringList
         title="行動候補"
-        items={dog.targetBehaviors}
-        onAdd={item => updateDog(d => {
-          const updated: Record<string, string[]> = {};
-          for (const sd of d.stimulusOptions) {
-            updated[sd] = [...(d.behaviorsByStimulus[sd] ?? d.targetBehaviors), item];
-          }
-          return { ...d, targetBehaviors: [...d.targetBehaviors, item], behaviorsByStimulus: updated };
-        })}
+        active={dog.targetBehaviors}
+        defaults={DEFAULT_BEHAVIORS}
+        onToggle={toggleString('targetBehaviors')}
+        onAdd={item => updateDog(d => ({ ...d, targetBehaviors: [...d.targetBehaviors, item] }))}
       />
 
-      <BehaviorByStimulus dog={dog} updateDog={updateDog} />
-
-      <AddableNumberList
+      <CheckboxNumberList
         title="行動が出るまでの時間"
-        items={dog.latencyOptions}
+        active={dog.latencyOptions}
+        defaults={DEFAULT_LATENCIES}
         unit="秒"
+        onToggle={toggleNumber('latencyOptions')}
         onAdd={item => updateDog(d => ({ ...d, latencyOptions: [...d.latencyOptions, item].sort((a, b) => a - b) }))}
       />
 
-      <AddableNumberList
+      <CheckboxNumberList
         title="行動の持続時間"
-        items={dog.durationOptions}
+        active={dog.durationOptions}
+        defaults={DEFAULT_DURATIONS}
         unit="秒"
+        onToggle={toggleNumber('durationOptions')}
         onAdd={item => updateDog(d => ({ ...d, durationOptions: [...d.durationOptions, item].sort((a, b) => a - b) }))}
       />
 
-      <AddableNumberList
+      <CheckboxNumberList
         title="距離候補"
-        items={dog.distanceOptions}
+        active={dog.distanceOptions}
+        defaults={DEFAULT_DISTANCES}
         unit="m"
+        onToggle={toggleNumber('distanceOptions')}
         onAdd={item => updateDog(d => ({ ...d, distanceOptions: [...d.distanceOptions, item].sort((a, b) => a - b) }))}
       />
 

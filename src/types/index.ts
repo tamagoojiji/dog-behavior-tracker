@@ -3,7 +3,6 @@ export interface Dog {
   name: string;
   targetBehaviors: string[];
   stimulusOptions: string[];
-  behaviorsByStimulus: Record<string, string[]>; // SDごとの行動テンプレート
   latencyOptions: number[];    // -1 = 反応なし
   durationOptions: number[];   // 行動の持続時間（秒）
   distanceOptions: number[];

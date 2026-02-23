@@ -18,18 +18,11 @@ export default function LoginPage() {
 
   const handleStart = () => {
     if (!name.trim()) return;
-    const defaultBehaviors = [...DEFAULT_BEHAVIORS];
-    const defaultStimuli = [...DEFAULT_STIMULI];
-    const behaviorsByStimulus: Record<string, string[]> = {};
-    for (const sd of defaultStimuli) {
-      behaviorsByStimulus[sd] = [...defaultBehaviors];
-    }
     const dog: Dog = {
       id: crypto.randomUUID(),
       name: name.trim(),
-      targetBehaviors: defaultBehaviors,
-      stimulusOptions: defaultStimuli,
-      behaviorsByStimulus,
+      targetBehaviors: [...DEFAULT_BEHAVIORS],
+      stimulusOptions: [...DEFAULT_STIMULI],
       latencyOptions: [...DEFAULT_LATENCIES],
       durationOptions: [...DEFAULT_DURATIONS],
       distanceOptions: [...DEFAULT_DISTANCES],
