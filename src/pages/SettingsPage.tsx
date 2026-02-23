@@ -267,7 +267,7 @@ export default function SettingsPage() {
       </div>
 
       <CheckboxStringList
-        title="SD（刺激）候補"
+        title="SD（刺激）候補（必要なものにチェックをいれる）"
         active={dog.stimulusOptions}
         defaults={DEFAULT_STIMULI}
         onToggle={toggleString('stimulusOptions')}
@@ -275,7 +275,7 @@ export default function SettingsPage() {
       />
 
       <CheckboxStringList
-        title="行動候補"
+        title="行動候補（必要なものにチェックをいれる）"
         active={dog.targetBehaviors}
         defaults={DEFAULT_BEHAVIORS}
         onToggle={toggleString('targetBehaviors')}
@@ -283,7 +283,7 @@ export default function SettingsPage() {
       />
 
       <CheckboxNumberList
-        title="行動が出るまでの時間"
+        title="行動が出るまでの時間（必要なものにチェックをいれる）"
         active={dog.latencyOptions}
         defaults={DEFAULT_LATENCIES}
         unit="秒"
@@ -292,7 +292,7 @@ export default function SettingsPage() {
       />
 
       <CheckboxNumberList
-        title="行動の持続時間"
+        title="行動の持続時間（必要なものにチェックをいれる）"
         active={dog.durationOptions}
         defaults={DEFAULT_DURATIONS}
         unit="秒"
@@ -301,7 +301,7 @@ export default function SettingsPage() {
       />
 
       <CheckboxNumberList
-        title="距離候補"
+        title="距離候補（必要なものにチェックをいれる）"
         active={dog.distanceOptions}
         defaults={DEFAULT_DISTANCES}
         unit="m"
