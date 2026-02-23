@@ -1,9 +1,13 @@
 import { useState, useCallback } from 'react';
 import { getActiveDog, getDogs, saveDog, setActiveDogId, clearSessionData } from '../store/localStorage';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import type { Dog } from '../types';
 import { DEFAULT_STIMULI, DEFAULT_BEHAVIORS, DEFAULT_LATENCIES, DEFAULT_DURATIONS, DEFAULT_DISTANCES } from '../types';
 import { generateTestData } from '../store/testData';
+import {
+  getSyncConfig, clearSyncConfig, getLastSync, getSyncQueueCount,
+  syncAll, getGasUrl, setGasUrl,
+} from '../store/syncService';
 
 function CheckboxStringList({
   title, active, defaults, onToggle, onAdd,
@@ -111,11 +115,16 @@ function CheckboxNumberList({
 }
 
 export default function SettingsPage() {
+  const navigate = useNavigate();
   const [dog, setDog] = useState<Dog | null>(getActiveDog);
   const [allDogs, setAllDogs] = useState<Dog[]>(getDogs);
   const [name, setName] = useState(dog?.name ?? '');
   const [goal, setGoal] = useState(dog?.goal ?? '');
   const [newDogName, setNewDogName] = useState('');
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('');
+  const [gasUrlInput, setGasUrlInput] = useState(getGasUrl());
+  const [syncConnected, setSyncConnected] = useState(!!getSyncConfig());
 
   const updateDog = useCallback((updater: (d: Dog) => Dog) => {
     setDog(prev => {
@@ -278,6 +287,105 @@ export default function SettingsPage() {
         onToggle={toggleNumber('distanceOptions')}
         onAdd={item => updateDog(d => ({ ...d, distanceOptions: [...d.distanceOptions, item].sort((a, b) => a - b) }))}
       />
+
+      <div className="setting-group" style={{ marginTop: 24, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+        <div className="setting-title">データ同期</div>
+        <div className="card">
+          {syncConnected ? (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 14 }}>ステータス</span>
+                <span style={{ fontSize: 14, color: 'var(--success)', fontWeight: 600 }}>接続済み</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 14 }}>最終同期</span>
+                <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                  {getLastSync() ? new Date(getLastSync()!).toLocaleString('ja-JP') : '未同期'}
+                </span>
+              </div>
+              {getSyncQueueCount() > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 14 }}>未送信キュー</span>
+                  <span style={{ fontSize: 14, color: 'var(--warning)', fontWeight: 600 }}>{getSyncQueueCount()}件</span>
+                </div>
+              )}
+              {syncMessage && (
+                <div style={{ fontSize: 13, color: syncMessage.includes('成功') ? 'var(--success)' : 'var(--danger)', marginBottom: 8 }}>
+                  {syncMessage}
+                </div>
+              )}
+              <button
+                className="btn btn-primary btn-full"
+                style={{ marginTop: 4 }}
+                onClick={async () => {
+                  setSyncing(true);
+                  setSyncMessage('');
+                  try {
+                    const ok = await syncAll();
+                    setSyncMessage(ok ? '同期成功' : '同期失敗（キューに保存済み）');
+                  } catch {
+                    setSyncMessage('同期エラー');
+                  } finally {
+                    setSyncing(false);
+                  }
+                }}
+                disabled={syncing}
+              >
+                {syncing ? '同期中...' : '手動同期'}
+              </button>
+              <button
+                className="btn btn-full"
+                style={{ marginTop: 8, fontSize: 13, color: 'var(--text-secondary)' }}
+                onClick={() => {
+                  if (confirm('同期設定を解除しますか？')) {
+                    clearSyncConfig();
+                    setSyncMessage('');
+                    setSyncConnected(false);
+                  }
+                }}
+              >
+                連携を解除
+              </button>
+            </>
+          ) : (
+            <>
+              <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 12 }}>
+                指導者との連携が未設定です
+              </p>
+              {getGasUrl() ? (
+                <button
+                  className="btn btn-primary btn-full"
+                  onClick={() => navigate('/login')}
+                >
+                  指導者と連携する
+                </button>
+              ) : (
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                  サーバーURLを下の「接続設定」で設定してください
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="setting-group">
+        <div className="setting-title">接続設定</div>
+        <div className="card">
+          <label className="label" style={{ marginTop: 0 }}>GAS Web App URL</label>
+          <input
+            className="input"
+            placeholder="https://script.google.com/macros/s/..."
+            value={gasUrlInput}
+            onChange={e => setGasUrlInput(e.target.value)}
+            onBlur={() => setGasUrl(gasUrlInput.trim())}
+            style={{ fontSize: 12 }}
+          />
+          <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4 }}>
+            指導者から共有されたURLを入力してください
+          </p>
+        </div>
+      </div>
 
       <div className="setting-group" style={{ marginTop: 32, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
         <div className="setting-title" style={{ color: 'var(--danger)' }}>開発用</div>

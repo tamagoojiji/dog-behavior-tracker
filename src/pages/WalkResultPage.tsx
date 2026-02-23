@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
-import { getSessions, saveSession, getEventsBySession, updateEvent, getActiveDog } from '../store/localStorage';
+import { getSessions, saveSession, getEventsBySession, updateEvent, getActiveDog, getDogs } from '../store/localStorage';
+import { syncToServer, getSyncConfig } from '../store/syncService';
 import type { BehaviorEvent } from '../types';
 import SummaryCard from '../components/SummaryCard';
 import EventMap, { BEHAVIOR_COLORS } from '../components/EventMap';
@@ -200,7 +201,17 @@ export default function WalkResultPage() {
   }
 
   const handleSave = () => {
-    saveSession({ ...session, treatAmount, comment });
+    const updatedSession = { ...session, treatAmount, comment };
+    saveSession(updatedSession);
+
+    // バックグラウンドでサーバー同期
+    if (getSyncConfig()) {
+      const dogs = getDogs();
+      syncToServer(dogs, [updatedSession], events).catch(() => {
+        // 失敗時はキューに自動追加される
+      });
+    }
+
     navigate('/');
   };
 

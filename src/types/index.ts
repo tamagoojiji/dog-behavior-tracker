@@ -45,3 +45,24 @@ export const DEFAULT_BEHAVIORS = ['吠え', '突進', '固まる', '回避', '�
 export const DEFAULT_LATENCIES = [0, 1, 2, 3, 4, 5, -1]; // -1 = なし
 export const DEFAULT_DURATIONS = [1, 2, 3, 5, 10, 15, 30, 60];
 export const DEFAULT_DISTANCES = [1, 2, 3, 5, 7, 10, 15, 20, 30, 50];
+
+// バックエンド同期用
+export interface Instructor {
+  id: string;
+  name: string;
+}
+
+export interface SyncConfig {
+  emailHash: string;
+  instructorId: string;
+}
+
+export interface SyncQueueItem {
+  id: string;
+  timestamp: number;
+  payload: {
+    dogs: Dog[];
+    sessions: Session[];
+    events: BehaviorEvent[];
+  };
+}
