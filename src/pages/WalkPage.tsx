@@ -44,6 +44,7 @@ export default function WalkPage() {
   const [editStimulus, setEditStimulus] = useState<string | null>(null);
   const [editBehavior, setEditBehavior] = useState<string | null>(null);
   const [editLatency, setEditLatency] = useState<number | null>(null);
+  const [editComment, setEditComment] = useState('');
 
   const { currentPosition, getPoints } = useGeolocation(true);
   useWakeLock(true);
@@ -73,6 +74,7 @@ export default function WalkPage() {
       stimulus: editStimulus ?? '',
       behavior: editBehavior,
       latency: editLatency,
+      comment: editComment,
     });
   }, [pendingEvent, editStimulus, editBehavior, editLatency]);
 
@@ -121,6 +123,7 @@ export default function WalkPage() {
     setEditStimulus(null);
     setEditBehavior(null);
     setEditLatency(null);
+    setEditComment('');
   }, [dog, sessionId, currentPosition]);
 
   // 誤タップ取消
@@ -258,6 +261,16 @@ export default function WalkPage() {
                 selected={editLatency === null ? null : editLatency === -1 ? 'なし' : `${editLatency}秒`}
                 onSelect={v => setEditLatency(v === 'なし' ? -1 : Number(v.replace('秒', '')))}
                 columns={4}
+              />
+
+              <div className="section-label">コメント</div>
+              <textarea
+                className="input"
+                placeholder="メモ..."
+                value={editComment}
+                onChange={e => setEditComment(e.target.value)}
+                rows={2}
+                style={{ minHeight: 48 }}
               />
 
               <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
