@@ -52,6 +52,12 @@ export interface Instructor {
   name: string;
 }
 
+export interface AdminInstructor {
+  id: string;
+  name: string;
+  userCount: number;
+}
+
 export interface SyncConfig {
   emailHash: string;
   instructorId: string;

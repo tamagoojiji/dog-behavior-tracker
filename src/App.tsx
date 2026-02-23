@@ -9,6 +9,7 @@ import SettingsPage from './pages/SettingsPage';
 import StatsPage from './pages/StatsPage';
 import ReminderPage from './pages/ReminderPage';
 import MapTestPage from './pages/MapTestPage';
+import AdminPage from './pages/AdminPage';
 
 function RequireSetup({ children }: { children: React.ReactNode }) {
   const dog = getActiveDog();
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/settings" element={<RequireSetup><SettingsPage /></RequireSetup>} />
         <Route path="/stats" element={<RequireSetup><StatsPage /></RequireSetup>} />
         <Route path="/map-test" element={<MapTestPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />
