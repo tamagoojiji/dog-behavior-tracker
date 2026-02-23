@@ -181,7 +181,7 @@ export default function WalkPage() {
         style={{ marginTop: 12 }}
         onClick={handleEnd}
       >
-        散歩終了
+        記録終了
       </button>
     </div>
   );

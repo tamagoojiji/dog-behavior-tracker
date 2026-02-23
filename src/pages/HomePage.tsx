@@ -83,7 +83,7 @@ export default function HomePage() {
         style={{ marginBottom: 16 }}
         onClick={() => navigate('/walk')}
       >
-        🚶 散歩開始
+        🚶 記録開始
       </button>
 
       <div className="section-label">最近の散歩</div>
