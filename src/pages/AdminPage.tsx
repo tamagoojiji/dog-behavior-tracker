@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { AdminInstructor } from '../types';
-import { fetchAdminInstructors, addInstructor, getGasUrl } from '../store/syncService';
+import { fetchAdminInstructors, addInstructor, getGasUrl, setGasUrl } from '../store/syncService';
 
 const SESSION_KEY = 'dbt_admin_password';
 
 export default function AdminPage() {
-  const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -15,11 +13,12 @@ export default function AdminPage() {
   const [newName, setNewName] = useState('');
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState('');
+  const [gasUrlInput, setGasUrlInput] = useState(getGasUrl());
 
   // sessionStorageからパスワードを復元
   useEffect(() => {
     const saved = sessionStorage.getItem(SESSION_KEY);
-    if (saved) {
+    if (saved && getGasUrl()) {
       setPassword(saved);
       handleLogin(saved);
     }
@@ -28,12 +27,19 @@ export default function AdminPage() {
 
   const getStoredPassword = () => sessionStorage.getItem(SESSION_KEY) || password;
 
+  function handleSaveGasUrl() {
+    const trimmed = gasUrlInput.trim();
+    setGasUrl(trimmed);
+    setGasUrlInput(trimmed);
+    if (trimmed) setAuthError('');
+  }
+
   async function handleLogin(pw?: string) {
     const pass = pw || password;
     if (!pass.trim()) return;
 
     if (!getGasUrl()) {
-      setAuthError('GAS URLが設定されていません。設定画面で設定してください。');
+      setAuthError('GAS URLを先に入力してください');
       return;
     }
 
@@ -62,7 +68,6 @@ export default function AdminPage() {
       const result = await addInstructor(trimmed, getStoredPassword());
       setMessage(`「${result.name}」を追加しました`);
       setNewName('');
-      // リスト更新
       const list = await fetchAdminInstructors(getStoredPassword());
       setInstructors(list);
     } catch (err) {
@@ -75,18 +80,35 @@ export default function AdminPage() {
   // 未認証: パスワード入力画面
   if (!authenticated) {
     return (
-      <div className="page" style={{ paddingBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <button
-            onClick={() => navigate('/')}
-            style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', padding: 4 }}
-          >
-            &larr;
-          </button>
-          <h1 className="page-title" style={{ marginBottom: 0 }}>Admin</h1>
-        </div>
+      <div className="page">
+        <h1 className="page-title">管理</h1>
 
-        <div className="card" style={{ marginTop: 40 }}>
+        {/* GAS URL未設定時は入力欄を表示 */}
+        {!getGasUrl() && (
+          <div className="setting-group">
+            <div className="setting-title">接続設定</div>
+            <div className="card">
+              <label className="label" style={{ marginTop: 0 }}>GAS Web App URL</label>
+              <input
+                className="input"
+                placeholder="https://script.google.com/macros/s/..."
+                value={gasUrlInput}
+                onChange={e => setGasUrlInput(e.target.value)}
+                style={{ fontSize: 12 }}
+              />
+              <button
+                className="btn btn-primary btn-full"
+                style={{ marginTop: 8 }}
+                onClick={handleSaveGasUrl}
+                disabled={!gasUrlInput.trim()}
+              >
+                保存
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="card">
           <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 16, textAlign: 'center' }}>
             管理者パスワードを入力してください
           </p>
@@ -117,17 +139,9 @@ export default function AdminPage() {
 
   // 認証済み: 管理画面
   return (
-    <div className="page" style={{ paddingBottom: 16 }}>
+    <div className="page">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button
-            onClick={() => navigate('/')}
-            style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', padding: 4 }}
-          >
-            &larr;
-          </button>
-          <h1 className="page-title" style={{ marginBottom: 0 }}>Admin</h1>
-        </div>
+        <h1 className="page-title" style={{ marginBottom: 0 }}>管理</h1>
         <button
           onClick={() => {
             sessionStorage.removeItem(SESSION_KEY);
