@@ -172,8 +172,8 @@ export default function WalkPage() {
         <span>記録: <strong>{eventCount}</strong>件</span>
       </div>
 
+      {/* === 行動記録 === */}
       {isRecording ? (
-        /* === 計測中 === */
         <div style={{ textAlign: 'center', marginTop: 20 }}>
           <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 8 }}>
             行動計測中...
@@ -209,7 +209,6 @@ export default function WalkPage() {
           </button>
         </div>
       ) : (
-        /* === 待機中 === */
         <>
           <button
             className="btn btn-primary btn-full"

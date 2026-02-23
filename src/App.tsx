@@ -7,6 +7,7 @@ import WalkPage from './pages/WalkPage';
 import WalkResultPage from './pages/WalkResultPage';
 import SettingsPage from './pages/SettingsPage';
 import StatsPage from './pages/StatsPage';
+import ReminderPage from './pages/ReminderPage';
 import MapTestPage from './pages/MapTestPage';
 
 function RequireSetup({ children }: { children: React.ReactNode }) {
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<RequireSetup><HomePage /></RequireSetup>} />
         <Route path="/walk" element={<RequireSetup><WalkPage /></RequireSetup>} />
+        <Route path="/reminder" element={<RequireSetup><ReminderPage /></RequireSetup>} />
         <Route path="/walk-result/:sessionId" element={<RequireSetup><WalkResultPage /></RequireSetup>} />
         <Route path="/settings" element={<RequireSetup><SettingsPage /></RequireSetup>} />
         <Route path="/stats" element={<RequireSetup><StatsPage /></RequireSetup>} />

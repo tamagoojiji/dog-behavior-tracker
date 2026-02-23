@@ -80,10 +80,23 @@ export default function HomePage() {
 
       <button
         className="btn btn-primary btn-full btn-lg"
-        style={{ marginBottom: 16 }}
+        style={{ marginBottom: 8 }}
         onClick={() => navigate('/walk')}
       >
         🚶 記録開始
+      </button>
+
+      <button
+        className="btn btn-full btn-lg"
+        style={{
+          marginBottom: 16,
+          background: 'var(--card-bg)',
+          border: '2px solid var(--primary)',
+          color: 'var(--primary)',
+        }}
+        onClick={() => navigate('/reminder')}
+      >
+        ⏱ リマインダー
       </button>
 
       <div className="section-label">最近の散歩</div>
