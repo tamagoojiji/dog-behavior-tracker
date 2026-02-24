@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>犬の行動記録アプリ 使い方ガイド</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+:root {
+  --accent: #4a90d9;
+  --accent-light: #e8f0fe;
+  --accent-dark: #2c5f8a;
+  --green: #4caf50;
+  --red: #e74c3c;
+  --orange: #ff9800;
+  --gray: #6b7280;
+  --gray-light: #f3f4f6;
+  --gray-border: #d1d5db;
+}
+.reveal {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+.reveal h1, .reveal h2, .reveal h3 {
+  color: var(--accent-dark);
+  text-transform: none;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.reveal h1 { font-size: 2em; }
+.reveal h2 { font-size: 1.4em; margin-bottom: 0.25em; }
+.reveal h3 { font-size: 1em; color: var(--accent); margin-top: 0.2em; margin-bottom: 0.15em; }
+.reveal p, .reveal li { font-size: 0.7em; line-height: 1.5; }
+.reveal ul { list-style: none; padding-left: 0; margin: 0.2em 0; }
+.reveal ul li::before { content: "•"; color: var(--accent); font-weight: bold; margin-right: 0.5em; }
+.reveal ul li { margin-bottom: 0.15em; }
+.reveal .small { font-size: 0.55em; color: var(--gray); }
+.reveal section { text-align: left; }
+
+/* アクセントバッジ */
+.badge {
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  font-size: 0.65em;
+  font-weight: 600;
+  color: #fff;
+  margin: 0.1em;
+}
+.badge-blue { background: var(--accent); }
+.badge-green { background: var(--green); }
+.badge-red { background: var(--red); }
+.badge-orange { background: var(--orange); }
+.badge-gray { background: var(--gray); }
+
+/* セクション仕切り */
+.section-divider {
+  text-align: center !important;
+}
+.section-divider h2 {
+  font-size: 1.8em;
+  margin-bottom: 0.3em;
+}
+.section-divider .icon {
+  font-size: 3em;
+  margin-bottom: 0.3em;
+}
+
+/* スマホモックアップ */
+.phone-mock {
+  width: 210px;
+  min-height: 320px;
+  border: 3px solid #333;
+  border-radius: 24px;
+  padding: 10px 8px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  font-size: 0.5em;
+}
+.phone-mock::before {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 5px;
+  background: #333;
+  border-radius: 3px;
+  margin: 0 auto 6px;
+}
+.phone-header {
+  background: var(--accent);
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 6px 6px 0 0;
+  font-weight: 600;
+  font-size: 0.95em;
+  text-align: center;
+}
+.phone-body {
+  padding: 4px;
+}
+.phone-btn {
+  display: block;
+  width: 100%;
+  padding: 6px;
+  margin: 3px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+  cursor: default;
+}
+.phone-btn-blue { background: var(--accent); }
+.phone-btn-red { background: var(--red); }
+.phone-btn-green { background: var(--green); }
+.phone-btn-gray { background: var(--gray-light); color: #333; }
+.phone-card {
+  background: var(--gray-light);
+  border-radius: 8px;
+  padding: 4px 6px;
+  margin: 3px 0;
+  font-size: 0.85em;
+}
+.phone-nav {
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid var(--gray-border);
+  padding-top: 4px;
+  margin-top: 4px;
+  font-size: 0.7em;
+  color: var(--gray);
+}
+.phone-nav span { text-align: center; }
+.phone-nav .active { color: var(--accent); font-weight: 600; }
+.phone-input {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--gray-border);
+  border-radius: 6px;
+  font-size: 0.85em;
+  margin: 3px 0;
+  box-sizing: border-box;
+  background: #fff;
+}
+.phone-label {
+  font-size: 0.75em;
+  color: var(--gray);
+  margin-top: 4px;
+  display: block;
+}
+.phone-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3px;
+  margin: 4px 0;
+}
+.phone-grid-btn {
+  padding: 5px 2px;
+  border: 1px solid var(--gray-border);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.8em;
+  background: #fff;
+  cursor: default;
+}
+.phone-grid-btn.selected {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* 2カラムレイアウト */
+.two-col {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.two-col .col-text {
+  flex: 1;
+  min-width: 0;
+}
+.two-col .col-phone {
+  flex: 0 0 230px;
+}
+
+/* フロー図 */
+.flow-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0.5em 0;
+}
+.flow-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.flow-label {
+  font-size: 0.7em;
+  font-weight: 600;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 6px;
+  min-width: 60px;
+  text-align: center;
+}
+.flow-label-student { background: var(--accent); }
+.flow-label-instructor { background: var(--green); }
+.flow-box {
+  background: #fff;
+  border: 2px solid var(--gray-border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.65em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.flow-arrow {
+  font-size: 1em;
+  color: var(--gray);
+}
+.flow-box.highlight {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+/* テーブル */
+.reveal table {
+  font-size: 0.6em;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.2em 0;
+}
+.reveal table th {
+  background: var(--accent);
+  color: #fff;
+  padding: 4px 8px;
+  text-align: left;
+}
+.reveal table td {
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--gray-border);
+}
+.reveal table tr:nth-child(even) td {
+  background: var(--gray-light);
+}
+
+/* 番号付きステップ */
+.steps {
+  counter-reset: step-counter;
+  list-style: none;
+  padding-left: 0;
+}
+.steps li {
+  counter-increment: step-counter;
+  margin-bottom: 0.3em;
+  padding-left: 2em;
+  position: relative;
+}
+.steps li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  width: 1.5em;
+  height: 1.5em;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1.5em;
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+/* FAQ */
+.faq-item {
+  margin-bottom: 0.4em;
+}
+.faq-q {
+  font-weight: 700;
+  color: var(--accent-dark);
+  font-size: 0.68em;
+}
+.faq-a {
+  font-size: 0.6em;
+  color: #444;
+  padding-left: 1em;
+  margin-top: 0.05em;
+}
+
+/* ポイントボックス */
+.point-box {
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  padding: 7px 12px;
+  border-radius: 0 8px 8px 0;
+  margin: 0.3em 0;
+  font-size: 0.65em;
+}
+.point-box.warn {
+  background: #fff3e0;
+  border-left-color: var(--orange);
+}
+
+/* コードブロック */
+.url-box {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: "SF Mono", "Consolas", monospace;
+  font-size: 0.55em;
+  word-break: break-all;
+  margin: 0.3em 0;
+}
+
+/* タイトルスライド */
+.title-slide {
+  text-align: center !important;
+}
+.title-slide h1 {
+  font-size: 2.2em;
+  margin-bottom: 0.2em;
+}
+.title-slide .subtitle {
+  font-size: 0.9em;
+  color: var(--gray);
+  margin-bottom: 1em;
+}
+.title-slide .app-icon {
+  width: 100px;
+  height: 100px;
+  background: var(--accent);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3em;
+  margin: 0 auto 0.5em;
+  color: #fff;
+}
+
+/* 管理画面モック */
+.admin-mock {
+  background: #fff;
+  border: 2px solid var(--gray-border);
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 0.6em;
+  max-width: 500px;
+  margin: 0.3em auto;
+}
+.admin-section {
+  margin-bottom: 10px;
+}
+.admin-section h4 {
+  font-size: 1em;
+  color: var(--accent-dark);
+  margin: 0 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--gray-border);
+}
+.admin-card {
+  display: inline-block;
+  background: var(--gray-light);
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin: 3px;
+  text-align: center;
+}
+.admin-card .name { font-weight: 600; }
+.admin-card .count { font-size: 1.4em; color: var(--accent); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ==================== 1. タイトル ==================== -->
+<section class="title-slide">
+  <div class="app-icon">🐕</div>
+  <h1>犬の行動記録アプリ<br>使い方ガイド</h1>
+  <p class="subtitle">散歩中の行動を記録・分析・共有</p>
+  <div class="url-box" style="max-width:500px;margin:0.5em auto;">
+    https://dog-training-tracker.github.io/dog-behavior-tracker/
+  </div>
+  <p class="small" style="text-align:center;margin-top:1em;">ブラウザで開くだけ・インストール不要</p>
+</section>
+
+<!-- ==================== 2. アプリ概要 ==================== -->
+<section>
+  <h2>アプリでできること</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:0.5em;">
+    <div class="point-box">
+      <strong>🚶 散歩記録</strong><br>
+      ワンタップで行動発生を記録<br>
+      GPS位置・潜時・距離も自動取得
+    </div>
+    <div class="point-box">
+      <strong>📊 統計分析</strong><br>
+      行動の推移をグラフ表示<br>
+      CSVダウンロードも可能
+    </div>
+    <div class="point-box">
+      <strong>👨‍🏫 指導者連携</strong><br>
+      データを指導者のシートに自動同期<br>
+      離れていても状況を共有
+    </div>
+    <div class="point-box">
+      <strong>📱 PWA</strong><br>
+      ブラウザで動作（iPhone / Android）<br>
+      ホーム画面に追加でアプリ風に
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 3. 全体フロー図 ==================== -->
+<section>
+  <h2>全体フロー</h2>
+  <div class="flow-container">
+    <div class="flow-row">
+      <div class="flow-label flow-label-student">飼い主</div>
+      <div class="flow-box highlight">初期設定</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box highlight">散歩記録</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">結果確認</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">統計分析</div>
+    </div>
+    <div style="text-align:center;font-size:0.7em;color:var(--gray);">↕ データ自動同期</div>
+    <div class="flow-row">
+      <div class="flow-label flow-label-instructor">指導者</div>
+      <div class="flow-box">管理画面</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">生徒データ閲覧</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">指導に活用</div>
+    </div>
+  </div>
+  <div class="point-box" style="margin-top:0.6em;">
+    飼い主が記録 → 自動で指導者のGoogleスプレッドシートに同期<br>
+    指導者はシートまたは管理画面からデータを確認できます
+  </div>
+</section>
+
+<!-- ==================== セクション仕切り：生徒向け ==================== -->
+<section class="section-divider">
+  <div class="icon">🐕‍🦺</div>
+  <h2>飼い主（生徒）向け</h2>
+  <p style="text-align:center;">散歩記録の使い方</p>
+</section>
+
+<!-- ==================== 4. 初期セットアップ ==================== -->
+<section>
+  <h2>初期セットアップ</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <ol class="steps">
+        <li><strong>犬の名前</strong>と<strong>目標</strong>を入力<br>
+          <span class="small">例: ポチ / 犬への反応を減らす</span></li>
+        <li><strong>指導者連携</strong>（オプション）<br>
+          <span class="small">指導者から共有された GAS URL とメールアドレスを入力</span></li>
+        <li><strong>指導者を選択</strong>してリスト<br>
+          <span class="small">担当の指導者を選んで「登録する」</span></li>
+      </ol>
+      <div class="point-box warn">
+        指導者連携は後からでも設定画面で設定できます
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">🐕 初期設定</div>
+        <div class="phone-body">
+          <span class="phone-label">犬の名前</span>
+          <div class="phone-input">ポチ</div>
+          <span class="phone-label">目標</span>
+          <div class="phone-input">犬への反応を減らす</div>
+          <span class="phone-label">GAS URL（指導者から共有）</span>
+          <div class="phone-input" style="font-size:0.7em;color:#999;">https://script.google...</div>
+          <span class="phone-label">メールアドレス</span>
+          <div class="phone-input">example@mail.com</div>
+          <div class="phone-btn phone-btn-blue" style="margin-top:10px;">登録する</div>
+          <div style="text-align:center;margin-top:4px;font-size:0.8em;color:var(--gray);">スキップ →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 5. ホーム画面 ==================== -->
+<section>
+  <h2>ホーム画面</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>表示される情報</h3>
+      <ul>
+        <li><strong>犬の名前</strong>と目標</li>
+        <li><strong>今週のサマリー</strong>: 記録件数・平均潜時・平均距離</li>
+        <li><strong>最近の散歩</strong>一覧（タップで詳細へ）</li>
+      </ul>
+      <h3>メインアクション</h3>
+      <ul>
+        <li><span class="badge badge-blue">記録開始</span> 散歩の記録を開始</li>
+        <li><span class="badge badge-green">リマインダー</span> インターバルタイマー</li>
+      </ul>
+      <div class="point-box">
+        複数の犬を登録している場合は<br>犬の切り替えボタンで選択できます
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">🏠 ホーム</div>
+        <div class="phone-body">
+          <div style="font-weight:600;font-size:0.95em;">🐕 ポチ</div>
+          <div style="font-size:0.75em;color:var(--gray);">目標: 犬への反応を減らす</div>
+          <div style="display:flex;gap:4px;margin:6px 0;">
+            <div class="phone-card" style="flex:1;text-align:center;">
+              <div style="font-size:1.4em;font-weight:700;color:var(--accent);">12</div>
+              <div style="font-size:0.75em;">記録</div>
+            </div>
+            <div class="phone-card" style="flex:1;text-align:center;">
+              <div style="font-size:1.4em;font-weight:700;color:var(--accent);">2.1秒</div>
+              <div style="font-size:0.75em;">潜時</div>
+            </div>
+            <div class="phone-card" style="flex:1;text-align:center;">
+              <div style="font-size:1.4em;font-weight:700;color:var(--accent);">8m</div>
+              <div style="font-size:0.75em;">距離</div>
+            </div>
+          </div>
+          <div class="phone-btn phone-btn-blue">🚶 記録開始</div>
+          <div class="phone-btn phone-btn-green">⏱ リマインダー</div>
+          <div style="font-size:0.8em;font-weight:600;margin-top:6px;">最近の散歩</div>
+          <div class="phone-card">2/24 14:30 — 5件</div>
+          <div class="phone-card">2/23 10:15 — 3件</div>
+        </div>
+        <div class="phone-nav">
+          <span>📊 統計</span>
+          <span class="active">🏠 ホーム</span>
+          <span>⚙️ 設定</span>
+          <span>🔑 管理</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 6. 散歩記録 ==================== -->
+<section>
+  <h2>散歩記録</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>記録の流れ</h3>
+      <ol class="steps">
+        <li><strong>行動発生時にタップ</strong><br>
+          <span class="small">大きな青ボタンを1タップ → タイマー開始</span></li>
+        <li><strong>行動終了で「終了」タップ</strong><br>
+          <span class="small">行動の持続時間を自動計測</span></li>
+        <li><strong>詳細を入力</strong><br>
+          <span class="small">SD（刺激）・行動・潜時・コメント</span></li>
+        <li><strong>散歩終了</strong><br>
+          <span class="small">赤い「記録終了」ボタンで結果画面へ</span></li>
+      </ol>
+      <div class="point-box">
+        GPSは自動で取得されます<br>
+        誤タップは「誤タップ取消」で取り消し可能
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">🚶 散歩記録 <span style="float:right;">03:24</span></div>
+        <div class="phone-body">
+          <div style="text-align:center;font-size:0.8em;color:var(--gray);">記録: 2件</div>
+          <div class="phone-btn phone-btn-blue" style="padding:18px 8px;font-size:1em;margin:10px 0;">
+            行動発生したら<br>タップ
+          </div>
+          <div style="font-size:0.8em;font-weight:600;margin:6px 0;">SD（刺激）</div>
+          <div class="phone-grid">
+            <div class="phone-grid-btn selected">犬</div>
+            <div class="phone-grid-btn">人</div>
+            <div class="phone-grid-btn">自転車</div>
+            <div class="phone-grid-btn">車</div>
+            <div class="phone-grid-btn">音</div>
+            <div class="phone-grid-btn">その他</div>
+          </div>
+          <div style="font-size:0.8em;font-weight:600;margin:4px 0;">行動</div>
+          <div class="phone-grid">
+            <div class="phone-grid-btn selected">吠え</div>
+            <div class="phone-grid-btn">突進</div>
+            <div class="phone-grid-btn">固まる</div>
+            <div class="phone-grid-btn">回避</div>
+            <div class="phone-grid-btn">引張り</div>
+            <div class="phone-grid-btn">AC</div>
+          </div>
+          <div class="phone-btn phone-btn-red" style="margin-top:10px;">記録終了</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 7. 散歩結果 ==================== -->
+<section>
+  <h2>散歩結果</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>確認できること</h3>
+      <ul>
+        <li><strong>サマリー</strong>: 記録件数・平均潜時・平均距離</li>
+        <li><strong>地図</strong>: ルートと行動発生地点をマーカー表示</li>
+        <li><strong>イベント一覧</strong>: 各記録の詳細（タップで編集可）</li>
+        <li><strong>おやつ量・コメント</strong>: 散歩全体のメモ（音声入力🎤対応）</li>
+      </ul>
+      <div class="point-box">
+        各イベントをタップで展開 → 行動・潜時・距離を修正可能<br>
+        「保存する」でホームに戻る＋自動同期
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">📋 散歩結果</div>
+        <div class="phone-body">
+          <div style="display:flex;gap:4px;margin:4px 0;">
+            <div class="phone-card" style="flex:1;text-align:center;">
+              <div style="font-weight:700;color:var(--accent);">5件</div>
+              <div style="font-size:0.7em;">記録</div>
+            </div>
+            <div class="phone-card" style="flex:1;text-align:center;">
+              <div style="font-weight:700;color:var(--accent);">1.8秒</div>
+              <div style="font-size:0.7em;">潜時</div>
+            </div>
+          </div>
+          <div style="background:#e8f0e8;border-radius:8px;padding:20px;text-align:center;margin:4px 0;font-size:0.8em;color:var(--gray);">
+            🗺️ 地図エリア<br>
+            <span style="font-size:0.8em;">ルート + マーカー表示</span>
+          </div>
+          <div class="phone-card">14:32 犬→吠え 5m 2秒</div>
+          <div class="phone-card">14:35 人→AC 10m 1秒</div>
+          <div class="phone-card">14:38 犬→突進 3m 0秒</div>
+          <span class="phone-label">おやつ量</span>
+          <div class="phone-input">30g</div>
+          <div class="phone-btn phone-btn-green">保存する</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 8. 統計画面 ==================== -->
+<section>
+  <h2>統計画面</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>統計で見られる情報</h3>
+      <ul>
+        <li><strong>今週のコメント</strong>（自動生成）<br>
+          <span class="small">「今週はX件の記録（Y回の散歩）」など</span></li>
+        <li><strong>全体サマリー</strong><br>
+          <span class="small">セッション数・記録件数・平均値</span></li>
+        <li><strong>行動別グラフ</strong><br>
+          <span class="small">潜時の推移（折れ線）と距離の推移（棒）</span></li>
+        <li><strong>SD別アイコンタクト率</strong><br>
+          <span class="small">刺激ごとのアイコンタクト成功率</span></li>
+      </ul>
+      <h3>データ出力</h3>
+      <ul>
+        <li><span class="badge badge-blue">CSVダウンロード</span><br>
+          <span class="small">日時・刺激・行動・潜時・距離・コメント</span></li>
+      </ul>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">📊 統計</div>
+        <div class="phone-body">
+          <div class="phone-btn phone-btn-blue" style="font-size:0.8em;">📥 CSVダウンロード</div>
+          <div class="phone-card">
+            <div style="font-weight:600;">今週のコメント</div>
+            <div style="font-size:0.8em;">今週は12件の記録（4回の散歩）。最も多い行動は「吠え」。</div>
+          </div>
+          <div style="font-size:0.85em;font-weight:600;margin:6px 0;">吠え（8回）</div>
+          <div style="background:var(--gray-light);border-radius:8px;padding:12px;text-align:center;">
+            <div style="display:flex;align-items:flex-end;justify-content:center;gap:6px;height:50px;">
+              <div style="width:16px;background:var(--accent);height:20px;border-radius:3px 3px 0 0;"></div>
+              <div style="width:16px;background:var(--accent);height:35px;border-radius:3px 3px 0 0;"></div>
+              <div style="width:16px;background:var(--accent);height:25px;border-radius:3px 3px 0 0;"></div>
+              <div style="width:16px;background:var(--accent);height:45px;border-radius:3px 3px 0 0;"></div>
+              <div style="width:16px;background:var(--accent);height:30px;border-radius:3px 3px 0 0;"></div>
+            </div>
+            <div style="font-size:0.7em;color:var(--gray);margin-top:4px;">日別推移グラフ</div>
+          </div>
+          <div style="font-size:0.85em;font-weight:600;margin:6px 0;">AC率</div>
+          <div class="phone-card" style="font-size:0.85em;">
+            犬: 25% / 人: 60% / 自転車: 40%
+          </div>
+        </div>
+        <div class="phone-nav">
+          <span class="active">📊 統計</span>
+          <span>🏠 ホーム</span>
+          <span>⚙️ 設定</span>
+          <span>🔑 管理</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 9. 設定画面 ==================== -->
+<section>
+  <h2>設定画面</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>犬の管理</h3>
+      <ul>
+        <li>犬の追加・切替・削除 ／ 名前・目標の編集</li>
+      </ul>
+      <h3>記録項目カスタマイズ</h3>
+      <table>
+        <tr><th>項目</th><th>初期値</th></tr>
+        <tr><td>SD（刺激）</td><td>犬, 人, 自転車, 車, 音, その他</td></tr>
+        <tr><td>行動</td><td>吠え, 突進, 固まる, 回避, 引張り, AC</td></tr>
+        <tr><td>潜時</td><td>0〜5秒, なし</td></tr>
+        <tr><td>距離</td><td>1〜50m（段階的）</td></tr>
+      </table>
+      <div class="point-box">
+        チェックでON/OFF + 独自の項目追加も可能
+      </div>
+      <h3>データ同期</h3>
+      <ul>
+        <li>同期状態確認・手動同期・連携解除</li>
+      </ul>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">⚙️ 設定</div>
+        <div class="phone-body">
+          <div style="font-size:0.85em;font-weight:600;">犬の管理</div>
+          <div class="phone-card" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>🐕 ポチ ✓</span>
+            <span style="font-size:0.75em;color:var(--gray);">アクティブ</span>
+          </div>
+          <div style="font-size:0.85em;font-weight:600;margin-top:6px;">SD候補</div>
+          <div style="font-size:0.8em;">
+            ☑ 犬 ☑ 人 ☑ 自転車<br>
+            ☑ 車 ☑ 音 ☑ その他
+          </div>
+          <div style="font-size:0.85em;font-weight:600;margin-top:6px;">行動候補</div>
+          <div style="font-size:0.8em;">
+            ☑ 吠え ☑ 突進 ☑ 固まる<br>
+            ☑ 回避 ☑ 引張り ☑ AC
+          </div>
+          <div style="font-size:0.85em;font-weight:600;margin-top:6px;">同期</div>
+          <div class="phone-card" style="font-size:0.85em;">
+            ✅ 接続済み<br>
+            最終同期: 2/24 14:30
+          </div>
+        </div>
+        <div class="phone-nav">
+          <span>📊 統計</span>
+          <span>🏠 ホーム</span>
+          <span class="active">⚙️ 設定</span>
+          <span>🔑 管理</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 10. リマインダー ==================== -->
+<section>
+  <h2>リマインダー</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>インターバルタイマー機能</h3>
+      <p style="margin:0.1em 0;">行動 → インターバル → 行動…のサイクルをカウントダウン</p>
+      <h3>設定項目（4つのうち3つを入力）</h3>
+      <table>
+        <tr><th>項目</th><th>説明</th></tr>
+        <tr><td>上限時間</td><td>トレーニング全体の時間</td></tr>
+        <tr><td>行動回数</td><td>繰り返す回数</td></tr>
+        <tr><td>平均行動時間</td><td>1回の行動フェーズの長さ</td></tr>
+        <tr><td>インターバル上限</td><td>インターバルの最大時間</td></tr>
+      </table>
+      <div class="point-box">
+        3つ入力 → 残り1つが<strong>自動計算</strong> ／ 画面は常にオン
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">⏱ リマインダー</div>
+        <div class="phone-body">
+          <div style="background:var(--green);color:#fff;border-radius:8px;padding:8px;text-align:center;margin:6px 0;">
+            <div style="font-size:0.85em;">行動 2 / 5</div>
+            <div style="font-size:2.5em;font-weight:700;line-height:1.2;">12</div>
+            <div style="font-size:0.8em;">秒</div>
+          </div>
+          <div style="text-align:center;font-size:0.8em;color:var(--gray);margin:4px 0;">
+            残り 02:30
+          </div>
+          <div class="phone-btn phone-btn-red">停止</div>
+          <div style="margin-top:8px;border-top:1px solid var(--gray-border);padding-top:6px;">
+            <div style="font-size:0.8em;font-weight:600;margin-bottom:4px;">設定例:</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:0.8em;">
+              <div class="phone-card">上限: 5分</div>
+              <div class="phone-card">回数: 5回</div>
+              <div class="phone-card">行動: 20秒</div>
+              <div class="phone-card" style="background:#fff3e0;">IV: 自動</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== セクション仕切り：指導者向け ==================== -->
+<section class="section-divider">
+  <div class="icon">👨‍🏫</div>
+  <h2>指導者向け</h2>
+  <p style="text-align:center;">管理画面の使い方</p>
+</section>
+
+<!-- ==================== 11. 管理画面へのアクセス ==================== -->
+<section>
+  <h2>管理画面へのアクセス</h2>
+  <h3>アクセス方法</h3>
+  <ol class="steps">
+    <li>アプリ下部の <span class="badge badge-gray">🔑 管理</span> タブをタップ</li>
+    <li><strong>GAS URL</strong> を入力して保存<br>
+      <div class="url-box" style="margin-top:0.3em;">https://script.google.com/macros/s/AKfycby.../exec</div></li>
+    <li><strong>Adminパスワード</strong> を入力してログイン<br>
+      <span class="small">※ パスワードは初期セットアップ時に自動生成されます</span></li>
+  </ol>
+  <div class="point-box warn">
+    タブを閉じると再ログインが必要です（パスワード自体は変わりません）<br>
+    GAS URLとパスワードは指導者間で共有してください
+  </div>
+</section>
+
+<!-- ==================== 12. 指導者管理 ==================== -->
+<section>
+  <h2>指導者管理</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>指導者一覧</h3>
+      <ul>
+        <li>登録済みの指導者がカード形式で表示</li>
+        <li>各指導者の<strong>担当ユーザー数</strong>を確認</li>
+        <li>指導者ごとにGoogleスプレッドシートが自動作成</li>
+      </ul>
+      <h3>新規指導者の追加</h3>
+      <ol class="steps">
+        <li>指導者名を入力</li>
+        <li>「追加」ボタンをタップ</li>
+        <li>専用のスプレッドシートが自動で作成される</li>
+      </ol>
+    </div>
+    <div class="col-phone">
+      <div class="admin-mock">
+        <div class="admin-section">
+          <h4>👨‍🏫 指導者一覧</h4>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="admin-card">
+              <div class="name">田中先生</div>
+              <div class="count">5</div>
+              <div style="font-size:0.85em;color:var(--gray);">ユーザー</div>
+            </div>
+            <div class="admin-card">
+              <div class="name">佐藤先生</div>
+              <div class="count">3</div>
+              <div style="font-size:0.85em;color:var(--gray);">ユーザー</div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-section">
+          <h4>指導者追加</h4>
+          <div style="display:flex;gap:4px;">
+            <div class="phone-input" style="flex:1;">新しい指導者名</div>
+            <div style="background:var(--accent);color:#fff;padding:5px 10px;border-radius:6px;font-size:0.9em;cursor:default;">追加</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 13. ユーザー管理 ==================== -->
+<section>
+  <h2>ユーザー管理</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>ユーザー一覧</h3>
+      <ul>
+        <li>登録されている全ユーザー（飼い主）を一覧表示</li>
+        <li>犬名・担当指導者・最終同期日を確認</li>
+      </ul>
+      <h3>指導者の変更</h3>
+      <ol class="steps">
+        <li>変更したいユーザーの「変更」ボタンをタップ</li>
+        <li>新しい担当指導者を選択</li>
+        <li>即座に反映（データは新しい指導者のシートへ）</li>
+      </ol>
+      <div class="point-box">
+        メールアドレスはハッシュ化されるため<br>
+        管理画面では犬名で識別します
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="admin-mock">
+        <div class="admin-section">
+          <h4>👤 ユーザー一覧</h4>
+          <table style="width:100%;font-size:0.95em;">
+            <tr><th>犬名</th><th>指導者</th><th>最終同期</th><th></th></tr>
+            <tr><td>ポチ</td><td>田中先生</td><td>2/24</td><td><span style="background:var(--accent);color:#fff;padding:2px 6px;border-radius:4px;font-size:0.85em;cursor:default;">変更</span></td></tr>
+            <tr><td>ハナ</td><td>田中先生</td><td>2/23</td><td><span style="background:var(--accent);color:#fff;padding:2px 6px;border-radius:4px;font-size:0.85em;cursor:default;">変更</span></td></tr>
+            <tr><td>コロ</td><td>佐藤先生</td><td>2/22</td><td><span style="background:var(--accent);color:#fff;padding:2px 6px;border-radius:4px;font-size:0.85em;cursor:default;">変更</span></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 14. 生徒への説明ポイント ==================== -->
+<section>
+  <h2>生徒への説明ポイント</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="point-box">
+      <strong>1. URLを共有する</strong><br>
+      アプリのURL + GAS URL の2つを伝える
+    </div>
+    <div class="point-box">
+      <strong>2. 初期設定のサポート</strong><br>
+      犬の名前・目標・メールアドレスの入力を手伝う
+    </div>
+    <div class="point-box">
+      <strong>3. 散歩記録のコツ</strong><br>
+      「行動が出たらすぐタップ」<br>
+      詳細は後から編集できると伝える
+    </div>
+    <div class="point-box">
+      <strong>4. ホーム画面に追加</strong><br>
+      ブラウザの「ホーム画面に追加」で<br>アプリ風に使える
+    </div>
+  </div>
+  <div class="point-box warn" style="margin-top:0.4em;">
+    <strong>注意点</strong>: GPS許可を「許可」に ／ 散歩中の画面ロックに注意 ／ ブラウザデータを消さない
+  </div>
+</section>
+
+<!-- ==================== 15. FAQ ==================== -->
+<section>
+  <h2>よくある質問（FAQ）</h2>
+  <div class="faq-item">
+    <div class="faq-q">Q. インストールは必要ですか？</div>
+    <div class="faq-a">A. 不要です。URLをブラウザで開くだけで使えます。「ホーム画面に追加」でアプリ風にもできます。</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Q. オフラインでも使えますか？</div>
+    <div class="faq-a">A. はい。記録はスマホに保存されます。ネット接続時に自動で同期されます。</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Q. 複数の犬を登録できますか？</div>
+    <div class="faq-a">A. はい。設定画面から犬を追加し、ホーム画面で切り替えて使えます。</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Q. 記録を間違えた場合は？</div>
+    <div class="faq-a">A. 散歩中は「誤タップ取消」、散歩後は結果画面で各記録をタップして編集できます。</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Q. 指導者側でデータはどこに保存されますか？</div>
+    <div class="faq-a">A. 指導者ごとのGoogleスプレッドシートに自動保存されます。Googleドライブから確認できます。</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Q. メールアドレスは安全ですか？</div>
+    <div class="faq-a">A. メールアドレスは暗号化（ハッシュ化）されて送信されます。指導者側でも元のアドレスは見えません。</div>
+  </div>
+</section>
+
+<!-- ==================== 16. まとめ・URL共有 ==================== -->
+<section class="title-slide">
+  <h2 style="margin-bottom:0.5em;">まとめ</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;max-width:600px;margin:0 auto 0.8em;text-align:center;">
+    <div class="point-box" style="text-align:center;">
+      <strong>🚶 記録</strong><br>
+      <span style="font-size:0.9em;">ワンタップで<br>行動を記録</span>
+    </div>
+    <div class="point-box" style="text-align:center;">
+      <strong>📊 分析</strong><br>
+      <span style="font-size:0.9em;">グラフで<br>変化を可視化</span>
+    </div>
+    <div class="point-box" style="text-align:center;">
+      <strong>👨‍🏫 連携</strong><br>
+      <span style="font-size:0.9em;">データを<br>自動共有</span>
+    </div>
+  </div>
+  <div style="max-width:500px;margin:0 auto;">
+    <h3 style="text-align:center;margin-bottom:0.3em;">アプリURL</h3>
+    <div class="url-box" style="text-align:center;">
+      https://dog-training-tracker.github.io/dog-behavior-tracker/
+    </div>
+  </div>
+  <p class="small" style="text-align:center;margin-top:1.5em;">
+    ← → キーでスライド切替 ／ Esc でスライド一覧 ／ F でフルスクリーン
+  </p>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: true,
+  width: 960,
+  height: 700,
+  margin: 0.08,
+  transition: 'slide',
+  center: false
+});
+</script>
+</body>
+</html>
