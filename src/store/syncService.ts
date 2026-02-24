@@ -13,10 +13,12 @@ const KEYS = {
   gasUrl: 'dbt_gas_url',
 };
 
+const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbyX0FsBeWn4rZjjJjRv3hD0Uzy_R8xPZRIm9T3sRMuHivhdPwXXXzdgouaV5zM1JKw/exec';
+
 // --- 設定管理 ---
 
 export function getGasUrl(): string {
-  return localStorage.getItem(KEYS.gasUrl) || '';
+  return localStorage.getItem(KEYS.gasUrl) || DEFAULT_GAS_URL;
 }
 
 export function setGasUrl(url: string): void {
