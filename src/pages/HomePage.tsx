@@ -52,6 +52,12 @@ export default function HomePage() {
     setRefreshKey(k => k + 1);
   };
 
+  const handleDeleteAllSessions = () => {
+    if (!confirm(`${dog.name}の散歩記録を全て削除しますか？（${sessions.length}件）`)) return;
+    sessions.forEach(s => removeSession(s.id));
+    setRefreshKey(k => k + 1);
+  };
+
   const handleSwitchDog = (id: string) => {
     setActiveDogId(id);
     setActiveDog(getDogs().find(d => d.id === id) ?? null);
@@ -106,7 +112,24 @@ export default function HomePage() {
         ⏱ タイマー
       </button>
 
-      <div className="section-label">最近の散歩</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="section-label" style={{ marginBottom: 0 }}>最近の散歩</div>
+        {sessions.length > 0 && (
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--danger)',
+              fontSize: 13,
+              cursor: 'pointer',
+              padding: '4px 0',
+            }}
+            onClick={handleDeleteAllSessions}
+          >
+            全て削除
+          </button>
+        )}
+      </div>
       <SessionList sessions={sessions} events={events} onSelect={handleSelectSession} onDelete={handleDeleteSession} />
     </div>
   );
