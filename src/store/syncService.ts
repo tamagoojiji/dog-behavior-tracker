@@ -298,6 +298,38 @@ export async function exportAllStudentsSheet(instructorId: string, password: str
   return result.data;
 }
 
+/**
+ * 講師コメントを保存
+ */
+export async function saveInstructorComment(
+  instructorId: string, emailHash: string, comment: string, password: string
+): Promise<void> {
+  const result = await fetchGasPost({
+    action: 'saveInstructorComment',
+    instructorId,
+    emailHash,
+    comment,
+    adminPassword: password,
+  }) as { success: boolean; error?: { message: string } };
+  if (!result.success) throw new Error(result.error?.message || '保存失敗');
+}
+
+/**
+ * 講師コメントを取得
+ */
+export async function fetchInstructorComment(
+  instructorId: string, emailHash: string, password: string
+): Promise<string> {
+  const result = await fetchGasPost({
+    action: 'getInstructorComment',
+    instructorId,
+    emailHash,
+    adminPassword: password,
+  }) as { success: boolean; data: { comment: string }; error?: { message: string } };
+  if (!result.success) throw new Error(result.error?.message || '取得失敗');
+  return result.data.comment;
+}
+
 // --- 同期処理 ---
 
 /**

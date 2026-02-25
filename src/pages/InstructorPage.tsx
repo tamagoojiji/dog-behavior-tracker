@@ -6,6 +6,8 @@ import {
   fetchStudentData,
   exportStudentSheet,
   exportAllStudentsSheet,
+  saveInstructorComment,
+  fetchInstructorComment,
 } from '../store/syncService';
 import { generateWeeklyComments } from '../utils/weeklyComments';
 import SummaryCard from '../components/SummaryCard';
@@ -15,6 +17,7 @@ type View = 'login' | 'students' | 'detail';
 const SESSION_KEY_PW = 'dbt_inst_pw';
 const SESSION_KEY_ID = 'dbt_inst_id';
 const SESSION_KEY_NAME = 'dbt_inst_name';
+const ADMIN_PW_KEY = 'dbt_admin_password';
 
 export default function InstructorPage() {
   const [view, setView] = useState<View>('login');
@@ -30,8 +33,14 @@ export default function InstructorPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [exportUrl, setExportUrl] = useState('');
   const [exportingAll, setExportingAll] = useState(false);
+  const [exportAllUrl, setExportAllUrl] = useState('');
   const [loginStep, setLoginStep] = useState<'password' | 'instructor'>('password');
+  // 講師コメント
+  const [instructorComment, setInstructorComment] = useState('');
+  const [savingComment, setSavingComment] = useState(false);
+  const [commentSaved, setCommentSaved] = useState(false);
 
   const loadStudents = useCallback(async (instId: string, pw: string) => {
     setLoading(true);
@@ -47,8 +56,9 @@ export default function InstructorPage() {
     }
   }, []);
 
-  // sessionStorageから自動ログイン
+  // sessionStorageから自動ログイン（講師PW or 管理画面PW）
   useEffect(() => {
+    // 講師ダッシュボード自身のセッション
     const savedPw = sessionStorage.getItem(SESSION_KEY_PW);
     const savedId = sessionStorage.getItem(SESSION_KEY_ID);
     const savedName = sessionStorage.getItem(SESSION_KEY_NAME);
@@ -57,6 +67,25 @@ export default function InstructorPage() {
       setInstructorId(savedId);
       setInstructorName(savedName);
       loadStudents(savedId, savedPw);
+      return;
+    }
+
+    // 管理画面からのPW引き継ぎ → 講師選択画面へ
+    const adminPw = sessionStorage.getItem(ADMIN_PW_KEY);
+    if (adminPw) {
+      setPassword(adminPw);
+      (async () => {
+        setLoading(true);
+        try {
+          const list = await fetchAdminInstructors(adminPw);
+          setInstructors(list);
+          setLoginStep('instructor');
+        } catch {
+          // 管理PWが無効 → 通常ログイン
+        } finally {
+          setLoading(false);
+        }
+      })();
     }
   }, [loadStudents]);
 
@@ -88,11 +117,17 @@ export default function InstructorPage() {
     setSelectedStudent(student);
     setLoading(true);
     setError('');
+    setExportUrl('');
+    setCommentSaved(false);
     try {
-      const data = await fetchStudentData(student.emailHash, password);
+      const [data, comment] = await Promise.all([
+        fetchStudentData(student.emailHash, password),
+        fetchInstructorComment(instructorId, student.emailHash, password),
+      ]);
       setStudentEvents(data.events);
       setStudentSessions(data.sessions);
       setComments(generateWeeklyComments(data.events, data.sessions));
+      setInstructorComment(comment);
       setView('detail');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'データ取得に失敗しました');
@@ -104,9 +139,10 @@ export default function InstructorPage() {
   const handleExport = async () => {
     if (!selectedStudent) return;
     setExporting(true);
+    setExportUrl('');
     try {
       const result = await exportStudentSheet(selectedStudent.emailHash, password);
-      window.open(result.url, '_blank');
+      setExportUrl(result.url);
     } catch (e) {
       alert('エクスポート失敗: ' + (e instanceof Error ? e.message : '不明なエラー'));
     } finally {
@@ -116,13 +152,29 @@ export default function InstructorPage() {
 
   const handleExportAll = async () => {
     setExportingAll(true);
+    setExportAllUrl('');
     try {
       const result = await exportAllStudentsSheet(instructorId, password);
-      window.open(result.url, '_blank');
+      setExportAllUrl(result.url);
     } catch (e) {
       alert('エクスポート失敗: ' + (e instanceof Error ? e.message : '不明なエラー'));
     } finally {
       setExportingAll(false);
+    }
+  };
+
+  const handleSaveComment = async () => {
+    if (!selectedStudent) return;
+    setSavingComment(true);
+    setCommentSaved(false);
+    try {
+      await saveInstructorComment(instructorId, selectedStudent.emailHash, instructorComment, password);
+      setCommentSaved(true);
+      setTimeout(() => setCommentSaved(false), 3000);
+    } catch (e) {
+      alert('保存失敗: ' + (e instanceof Error ? e.message : '不明なエラー'));
+    } finally {
+      setSavingComment(false);
     }
   };
 
@@ -260,14 +312,30 @@ export default function InstructorPage() {
         </div>
 
         {students.length > 0 && (
-          <button
-            className="btn btn-primary btn-full"
-            style={{ marginTop: 16, padding: 14, fontSize: 16 }}
-            onClick={handleExportAll}
-            disabled={exportingAll}
-          >
-            {exportingAll ? 'エクスポート中...' : '全生徒をスプシに出力'}
-          </button>
+          <>
+            <button
+              className="btn btn-primary btn-full"
+              style={{ marginTop: 16, padding: 14, fontSize: 16 }}
+              onClick={handleExportAll}
+              disabled={exportingAll}
+            >
+              {exportingAll ? 'エクスポート中...' : '全生徒をスプシに出力'}
+            </button>
+            {exportAllUrl && (
+              <a
+                href={exportAllUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'block', marginTop: 8, padding: 12, fontSize: 14,
+                  textAlign: 'center', color: 'var(--primary)', wordBreak: 'break-all',
+                  background: 'var(--bg-secondary)', borderRadius: 8,
+                }}
+              >
+                スプレッドシートを開く
+              </a>
+            )}
+          </>
         )}
 
         <button
@@ -302,15 +370,6 @@ export default function InstructorPage() {
 
       {!loading && (
         <>
-          <button
-            className="btn btn-primary btn-full"
-            style={{ marginBottom: 12, padding: 16, fontSize: 18 }}
-            onClick={handleExport}
-            disabled={exporting}
-          >
-            {exporting ? 'エクスポート中...' : 'スプレッドシートに出力'}
-          </button>
-
           <div className="section-label">今週のコメント</div>
           <div className="card" style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--text)' }}>
             {comments.length > 0 ? (
@@ -331,6 +390,59 @@ export default function InstructorPage() {
                 avgDistance={studentStats.avgDistance}
               />
             </>
+          )}
+
+          {/* 講師コメント欄 */}
+          <div className="section-label">講師コメント</div>
+          <div className="card" style={{ padding: 12 }}>
+            <textarea
+              value={instructorComment}
+              onChange={e => { setInstructorComment(e.target.value); setCommentSaved(false); }}
+              placeholder="この生徒へのコメントを入力..."
+              rows={4}
+              style={{
+                width: '100%', padding: 10, fontSize: 14, borderRadius: 8,
+                border: '1px solid var(--border)', boxSizing: 'border-box',
+                resize: 'vertical', fontFamily: 'inherit',
+              }}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+              <button
+                className="btn btn-primary"
+                style={{ padding: '8px 20px', fontSize: 14 }}
+                onClick={handleSaveComment}
+                disabled={savingComment}
+              >
+                {savingComment ? '保存中...' : '保存'}
+              </button>
+              {commentSaved && (
+                <span style={{ fontSize: 13, color: 'var(--success)' }}>保存しました</span>
+              )}
+            </div>
+          </div>
+
+          {/* スプレッドシート出力（最下部） */}
+          <button
+            className="btn btn-primary btn-full"
+            style={{ marginTop: 16, padding: 16, fontSize: 18 }}
+            onClick={handleExport}
+            disabled={exporting}
+          >
+            {exporting ? 'エクスポート中...' : 'スプレッドシートに出力'}
+          </button>
+          {exportUrl && (
+            <a
+              href={exportUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'block', marginTop: 8, padding: 12, fontSize: 14,
+                textAlign: 'center', color: 'var(--primary)', wordBreak: 'break-all',
+                background: 'var(--bg-secondary)', borderRadius: 8,
+              }}
+            >
+              スプレッドシートを開く
+            </a>
           )}
         </>
       )}
