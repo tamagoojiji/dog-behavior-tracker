@@ -18,10 +18,13 @@ const SESSION_KEY_PW = 'dbt_inst_pw';
 const SESSION_KEY_ID = 'dbt_inst_id';
 const SESSION_KEY_NAME = 'dbt_inst_name';
 const ADMIN_PW_KEY = 'dbt_admin_password';
+const SAVED_PW_KEY = 'dbt_saved_password';
+const REMEMBER_KEY = 'dbt_remember_pw';
 
 export default function InstructorPage() {
   const [view, setView] = useState<View>('login');
   const [password, setPassword] = useState('');
+  const [rememberPw, setRememberPw] = useState(() => localStorage.getItem(REMEMBER_KEY) === 'true');
   const [instructors, setInstructors] = useState<AdminInstructor[]>([]);
   const [instructorId, setInstructorId] = useState('');
   const [instructorName, setInstructorName] = useState('');
@@ -56,9 +59,9 @@ export default function InstructorPage() {
     }
   }, []);
 
-  // sessionStorageから自動ログイン（講師PW or 管理画面PW）
+  // 自動ログイン（講師セッション → localStorage保存PW → 管理画面PW）
   useEffect(() => {
-    // 講師ダッシュボード自身のセッション
+    // 1. 講師ダッシュボード自身のセッション
     const savedPw = sessionStorage.getItem(SESSION_KEY_PW);
     const savedId = sessionStorage.getItem(SESSION_KEY_ID);
     const savedName = sessionStorage.getItem(SESSION_KEY_NAME);
@@ -70,18 +73,20 @@ export default function InstructorPage() {
       return;
     }
 
-    // 管理画面からのPW引き継ぎ → 講師選択画面へ
+    // 2. localStorage保存済みPW or 管理画面からのPW引き継ぎ → 講師選択画面へ
+    const rememberedPw = localStorage.getItem(SAVED_PW_KEY);
     const adminPw = sessionStorage.getItem(ADMIN_PW_KEY);
-    if (adminPw) {
-      setPassword(adminPw);
+    const pw = rememberedPw || adminPw;
+    if (pw) {
+      setPassword(pw);
       (async () => {
         setLoading(true);
         try {
-          const list = await fetchAdminInstructors(adminPw);
+          const list = await fetchAdminInstructors(pw);
           setInstructors(list);
           setLoginStep('instructor');
         } catch {
-          // 管理PWが無効 → 通常ログイン
+          // PWが無効 → 通常ログイン
         } finally {
           setLoading(false);
         }
@@ -97,6 +102,10 @@ export default function InstructorPage() {
       const list = await fetchAdminInstructors(password);
       setInstructors(list);
       setLoginStep('instructor');
+      if (rememberPw) {
+        localStorage.setItem(SAVED_PW_KEY, password);
+        localStorage.setItem(REMEMBER_KEY, 'true');
+      }
     } catch {
       setError('パスワードが正しくありません');
     } finally {
@@ -182,6 +191,9 @@ export default function InstructorPage() {
     sessionStorage.removeItem(SESSION_KEY_PW);
     sessionStorage.removeItem(SESSION_KEY_ID);
     sessionStorage.removeItem(SESSION_KEY_NAME);
+    localStorage.removeItem(SAVED_PW_KEY);
+    localStorage.removeItem(REMEMBER_KEY);
+    setRememberPw(false);
     setView('login');
     setLoginStep('password');
     setPassword('');
@@ -222,6 +234,21 @@ export default function InstructorPage() {
                   border: '2px solid var(--border)', boxSizing: 'border-box',
                 }}
               />
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 14, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={rememberPw}
+                  onChange={e => {
+                    setRememberPw(e.target.checked);
+                    if (!e.target.checked) {
+                      localStorage.removeItem(SAVED_PW_KEY);
+                      localStorage.removeItem(REMEMBER_KEY);
+                    }
+                  }}
+                  style={{ width: 18, height: 18 }}
+                />
+                パスワードを保存
+              </label>
             </div>
             <button
               className="btn btn-primary btn-full"

@@ -6,9 +6,12 @@ import {
 } from '../store/syncService';
 
 const SESSION_KEY = 'dbt_admin_password';
+const SAVED_PW_KEY = 'dbt_saved_password';
+const REMEMBER_KEY = 'dbt_remember_pw';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
+  const [rememberPw, setRememberPw] = useState(() => localStorage.getItem(REMEMBER_KEY) === 'true');
   const [authenticated, setAuthenticated] = useState(false);
   const [authError, setAuthError] = useState('');
   const [instructors, setInstructors] = useState<AdminInstructor[]>([]);
@@ -22,6 +25,13 @@ export default function AdminPage() {
   const [changingInstructor, setChangingInstructor] = useState(false);
 
   useEffect(() => {
+    // localStorageの保存済みPWを優先
+    const rememberedPw = localStorage.getItem(SAVED_PW_KEY);
+    if (rememberedPw && getGasUrl()) {
+      setPassword(rememberedPw);
+      handleLogin(rememberedPw);
+      return;
+    }
     const saved = sessionStorage.getItem(SESSION_KEY);
     if (saved && getGasUrl()) {
       setPassword(saved);
@@ -56,6 +66,10 @@ export default function AdminPage() {
         fetchAdminUsers(pass),
       ]);
       sessionStorage.setItem(SESSION_KEY, pass);
+      if (rememberPw) {
+        localStorage.setItem(SAVED_PW_KEY, pass);
+        localStorage.setItem(REMEMBER_KEY, 'true');
+      }
       setAuthenticated(true);
       setInstructors(instList);
       setUsers(userList);
@@ -148,6 +162,21 @@ export default function AdminPage() {
             onKeyDown={e => e.key === 'Enter' && handleLogin()}
             autoFocus
           />
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 14, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={rememberPw}
+              onChange={e => {
+                setRememberPw(e.target.checked);
+                if (!e.target.checked) {
+                  localStorage.removeItem(SAVED_PW_KEY);
+                  localStorage.removeItem(REMEMBER_KEY);
+                }
+              }}
+              style={{ width: 18, height: 18 }}
+            />
+            パスワードを保存
+          </label>
           {authError && (
             <p style={{ fontSize: 13, color: 'var(--danger)', marginTop: 8 }}>{authError}</p>
           )}
@@ -172,6 +201,9 @@ export default function AdminPage() {
         <button
           onClick={() => {
             sessionStorage.removeItem(SESSION_KEY);
+            localStorage.removeItem(SAVED_PW_KEY);
+            localStorage.removeItem(REMEMBER_KEY);
+            setRememberPw(false);
             setAuthenticated(false);
             setPassword('');
             setInstructors([]);
