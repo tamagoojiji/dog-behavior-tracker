@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { AdminInstructor, AdminUser } from '../types';
 import {
   fetchAdminInstructors, fetchAdminUsers, addInstructor,
@@ -9,7 +8,6 @@ import {
 const SESSION_KEY = 'dbt_admin_password';
 
 export default function AdminPage() {
-  const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -184,15 +182,6 @@ export default function AdminPage() {
           ログアウト
         </button>
       </div>
-
-      {/* 講師ダッシュボードへのリンク */}
-      <button
-        className="btn btn-primary btn-full"
-        style={{ marginBottom: 16, padding: 14, fontSize: 16 }}
-        onClick={() => navigate('/instructor')}
-      >
-        講師ダッシュボードへ
-      </button>
 
       {/* 指導者一覧 */}
       <div className="setting-group">
