@@ -65,6 +65,10 @@ export default function HomePage() {
 
   return (
     <div className="page">
+      <div style={{ textAlign: 'center', marginBottom: 8 }}>
+        <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: 1 }}>DogNote</div>
+      </div>
+
       <div style={{ marginBottom: 16 }}>
         <h1 className="page-title">🐕 {dog.name}</h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>目標: {dog.goal}</p>
