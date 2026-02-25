@@ -281,6 +281,23 @@ export async function exportStudentSheet(emailHash: string, password: string): P
   return result.data;
 }
 
+/**
+ * 全生徒データをまとめて1つのスプレッドシートにエクスポート
+ */
+export async function exportAllStudentsSheet(instructorId: string, password: string): Promise<{ url: string; title: string }> {
+  const result = await fetchGasPost({
+    action: 'exportAllStudentsSheet',
+    instructorId,
+    adminPassword: password,
+  }) as {
+    success: boolean;
+    data: { url: string; title: string };
+    error?: { message: string };
+  };
+  if (!result.success) throw new Error(result.error?.message || 'エクスポート失敗');
+  return result.data;
+}
+
 // --- 同期処理 ---
 
 /**

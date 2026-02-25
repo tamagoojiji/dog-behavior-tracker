@@ -5,6 +5,7 @@ import {
   fetchInstructorStudents,
   fetchStudentData,
   exportStudentSheet,
+  exportAllStudentsSheet,
 } from '../store/syncService';
 import { generateWeeklyComments } from '../utils/weeklyComments';
 import SummaryCard from '../components/SummaryCard';
@@ -29,6 +30,7 @@ export default function InstructorPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [exportingAll, setExportingAll] = useState(false);
   const [loginStep, setLoginStep] = useState<'password' | 'instructor'>('password');
 
   const loadStudents = useCallback(async (instId: string, pw: string) => {
@@ -109,6 +111,18 @@ export default function InstructorPage() {
       alert('エクスポート失敗: ' + (e instanceof Error ? e.message : '不明なエラー'));
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleExportAll = async () => {
+    setExportingAll(true);
+    try {
+      const result = await exportAllStudentsSheet(instructorId, password);
+      window.open(result.url, '_blank');
+    } catch (e) {
+      alert('エクスポート失敗: ' + (e instanceof Error ? e.message : '不明なエラー'));
+    } finally {
+      setExportingAll(false);
     }
   };
 
@@ -245,9 +259,20 @@ export default function InstructorPage() {
           ))}
         </div>
 
+        {students.length > 0 && (
+          <button
+            className="btn btn-primary btn-full"
+            style={{ marginTop: 16, padding: 14, fontSize: 16 }}
+            onClick={handleExportAll}
+            disabled={exportingAll}
+          >
+            {exportingAll ? 'エクスポート中...' : '全生徒をスプシに出力'}
+          </button>
+        )}
+
         <button
           className="btn btn-full"
-          style={{ marginTop: 16, padding: 14, fontSize: 16, background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
+          style={{ marginTop: 8, padding: 14, fontSize: 16, background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
           onClick={() => loadStudents(instructorId, password)}
           disabled={loading}
         >
