@@ -142,9 +142,9 @@ export function migrateData(): void {
       dog.durationOptions = [...DEFAULT_DURATIONS];
       changed = true;
     }
-    // latencyOptionsから-1（なし）を除去
-    if (dog.latencyOptions && dog.latencyOptions.includes(-1)) {
-      dog.latencyOptions = dog.latencyOptions.filter(l => l >= 0);
+    // latencyOptionsから-1（なし）と0を除去
+    if (dog.latencyOptions && (dog.latencyOptions.includes(-1) || dog.latencyOptions.includes(0))) {
+      dog.latencyOptions = dog.latencyOptions.filter(l => l > 0);
       changed = true;
     }
     // behaviorsByStimulus を削除（不要になった）
