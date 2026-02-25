@@ -3,7 +3,7 @@
  * GAS Web App とのデータ同期・キュー管理
  */
 
-import type { Instructor, AdminInstructor, AdminUser, SyncConfig, SyncQueueItem, Dog, Session, BehaviorEvent } from '../types';
+import type { Instructor, AdminInstructor, AdminUser, InstructorStudent, SyncConfig, SyncQueueItem, Dog, Session, BehaviorEvent } from '../types';
 import { getDogs, getSessions, getEvents } from './localStorage';
 
 const KEYS = {
@@ -223,6 +223,62 @@ export async function registerUser(emailHash: string, instructorId: string, dogN
   }) as { success: boolean; error?: { message: string } };
 
   if (!result.success) throw new Error(result.error?.message || '登録失敗');
+}
+
+// --- 講師ダッシュボード用 ---
+
+/**
+ * 講師の生徒一覧を取得
+ */
+export async function fetchInstructorStudents(instructorId: string, password: string): Promise<InstructorStudent[]> {
+  const result = await fetchGasGet(
+    '?action=getInstructorStudents&instructorId=' + encodeURIComponent(instructorId) +
+    '&password=' + encodeURIComponent(password)
+  ) as {
+    success: boolean;
+    data: InstructorStudent[];
+    error?: { message: string };
+  };
+  if (!result.success) throw new Error(result.error?.message || '取得失敗');
+  return result.data;
+}
+
+/**
+ * 生徒のデータを取得（講師ダッシュボード用・認証付き）
+ */
+export async function fetchStudentData(emailHash: string, password: string): Promise<{
+  dogs: Dog[];
+  sessions: Session[];
+  events: BehaviorEvent[];
+}> {
+  const result = await fetchGasPost({
+    action: 'getStudentData',
+    emailHash,
+    adminPassword: password,
+  }) as {
+    success: boolean;
+    data: { dogs: Dog[]; sessions: Session[]; events: BehaviorEvent[] };
+    error?: { message: string };
+  };
+  if (!result.success) throw new Error(result.error?.message || '取得失敗');
+  return result.data;
+}
+
+/**
+ * 生徒のデータをスプレッドシートにエクスポート
+ */
+export async function exportStudentSheet(emailHash: string, password: string): Promise<{ url: string; title: string }> {
+  const result = await fetchGasPost({
+    action: 'exportStudentSheet',
+    emailHash,
+    adminPassword: password,
+  }) as {
+    success: boolean;
+    data: { url: string; title: string };
+    error?: { message: string };
+  };
+  if (!result.success) throw new Error(result.error?.message || 'エクスポート失敗');
+  return result.data;
 }
 
 // --- 同期処理 ---

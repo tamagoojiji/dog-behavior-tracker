@@ -11,8 +11,8 @@ export default function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 散歩中・結果画面では非表示
-  if (location.pathname.startsWith('/walk') || location.pathname === '/login') return null;
+  // 散歩中・結果画面・講師ダッシュボードでは非表示
+  if (location.pathname.startsWith('/walk') || location.pathname === '/login' || location.pathname === '/instructor') return null;
 
   return (
     <nav className="bottom-nav">

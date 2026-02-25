@@ -72,6 +72,14 @@ export interface SyncConfig {
   instructorId: string;
 }
 
+export interface InstructorStudent {
+  emailHash: string;
+  dogName: string;
+  sessionCount: number;
+  eventCount: number;
+  lastSync: string;
+}
+
 export interface SyncQueueItem {
   id: string;
   timestamp: number;
