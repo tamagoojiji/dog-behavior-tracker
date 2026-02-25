@@ -4,6 +4,7 @@ interface SessionListProps {
   sessions: Session[];
   events: BehaviorEvent[];
   onSelect: (session: Session) => void;
+  onDelete?: (session: Session) => void;
 }
 
 function formatDate(ts: number): string {
@@ -19,7 +20,7 @@ function formatDuration(start: number, end: number | null): string {
   return `${m}分${s}秒`;
 }
 
-export default function SessionList({ sessions, events, onSelect }: SessionListProps) {
+export default function SessionList({ sessions, events, onSelect, onDelete }: SessionListProps) {
   const sorted = [...sessions].sort((a, b) => b.startTime - a.startTime);
 
   if (sorted.length === 0) {
@@ -31,14 +32,34 @@ export default function SessionList({ sessions, events, onSelect }: SessionListP
       {sorted.map(session => {
         const sessionEvents = events.filter(e => e.sessionId === session.id);
         return (
-          <div key={session.id} className="session-item" onClick={() => onSelect(session)}>
-            <div>
+          <div key={session.id} className="session-item" style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => onSelect(session)}>
               <div className="session-date">{formatDate(session.startTime)}</div>
               <div className="session-meta">{formatDuration(session.startTime, session.endTime)}</div>
             </div>
-            <div className="session-stats">
+            <div className="session-stats" style={{ marginRight: onDelete ? 8 : 0 }}>
               <div>{sessionEvents.length}件</div>
             </div>
+            {onDelete && (
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  fontSize: 18,
+                  padding: '4px 8px',
+                  cursor: 'pointer',
+                  opacity: 0.6,
+                }}
+                onClick={e => {
+                  e.stopPropagation();
+                  onDelete(session);
+                }}
+                aria-label="削除"
+              >
+                ✕
+              </button>
+            )}
           </div>
         );
       })}

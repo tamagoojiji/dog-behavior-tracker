@@ -1,5 +1,6 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { getActiveDog, getEventsByDog, getSessionsByDog } from '../store/localStorage';
+import { getGasUrl } from '../store/syncService';
 import { Navigate } from 'react-router-dom';
 import SummaryCard from '../components/SummaryCard';
 import {
@@ -15,6 +16,22 @@ function formatDateShort(ts: number): string {
 function formatDateFull(ts: number): string {
   const d = new Date(ts);
   return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+}
+
+function getAthleteComparison(avgLatency: number): string | null {
+  if (avgLatency <= 0.5) {
+    return '⚡ 陸上短距離選手のスタート反応（約0.1〜0.2秒）に迫る速さです！';
+  } else if (avgLatency <= 1.0) {
+    return '🏓 卓球選手のリターン反応（約0.5〜1秒）と同レベルです！';
+  } else if (avgLatency <= 2.0) {
+    return '⚾ 野球バッターの投球判断（約1〜2秒）と同じくらいの反応速度です。';
+  } else if (avgLatency <= 3.0) {
+    return '🥊 ボクサーの防御反応（約2〜3秒の判断時間）に近い水準です。';
+  } else if (avgLatency <= 5.0) {
+    return '⚽ サッカーGKのPK反応（約3〜5秒の読み時間）と同等の判断速度です。';
+  } else {
+    return '🏋️ まだ反応に時間がかかっていますが、トレーニングで必ず改善します！';
+  }
 }
 
 interface DailyPoint {
@@ -111,11 +128,14 @@ export default function StatsPage() {
         comments.push(`最も多い行動は「${topBehavior[0]}」（${topBehavior[1]}件）でした。`);
       }
 
-      // 平均潜時
+      // 平均潜時 + 選手比較
       const weekLatencies = weekEvents.filter(e => e.latency !== null && e.latency >= 0).map(e => e.latency!);
       if (weekLatencies.length > 0) {
         const weekAvgLat = +(weekLatencies.reduce((a, b) => a + b, 0) / weekLatencies.length).toFixed(1);
         comments.push(`平均反応潜時は${weekAvgLat}秒です。`);
+        // 選手比較コメント
+        const comparison = getAthleteComparison(weekAvgLat);
+        if (comparison) comments.push(comparison);
       }
 
       // 平均距離
@@ -153,9 +173,45 @@ export default function StatsPage() {
     return { count, avgLatency, avgDistance, sessionCount: sessions.length, byStimulus, sortedBehaviors, comments };
   }, [dog?.id]);
 
-  const handleCsvDownload = useCallback(() => {
+  const [exporting, setExporting] = useState(false);
+
+  const handleDataDownload = useCallback(async () => {
     if (!dog) return;
     const events = getEventsByDog(dog.id);
+    const gasUrl = getGasUrl();
+
+    // GAS接続あり → スプレッドシートへエクスポート
+    if (gasUrl) {
+      setExporting(true);
+      try {
+        const response = await fetch(gasUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'exportToSheet',
+            dogName: dog.name,
+            events: events,
+          }),
+          redirect: 'follow',
+        });
+        const result = await response.json() as { success: boolean; data?: { url: string }; error?: { message: string } };
+        if (result.success && result.data?.url) {
+          window.open(result.data.url, '_blank');
+        } else {
+          alert('エクスポートに失敗しました: ' + (result.error?.message || '不明なエラー'));
+        }
+      } catch {
+        alert('通信エラーが発生しました。CSV形式でダウンロードします。');
+        downloadCsv(dog.name, events);
+      } finally {
+        setExporting(false);
+      }
+    } else {
+      // GAS未接続 → CSV
+      downloadCsv(dog.name, events);
+    }
+  }, [dog]);
+
+  function downloadCsv(dogName: string, events: import('../types').BehaviorEvent[]) {
     const bom = '\uFEFF';
     const header = '日時,刺激,行動,潜時(秒),距離(m),コメント';
     const rows = events.map(e => {
@@ -172,10 +228,10 @@ export default function StatsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${dog.name}_行動記録.csv`;
+    a.download = `${dogName}_行動記録.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [dog]);
+  }
 
   if (!dog) {
     return <Navigate to="/login" replace />;
@@ -199,9 +255,10 @@ export default function StatsPage() {
       <button
         className="btn btn-primary btn-full"
         style={{ marginBottom: 12 }}
-        onClick={handleCsvDownload}
+        onClick={handleDataDownload}
+        disabled={exporting}
       >
-        CSVダウンロード
+        {exporting ? 'エクスポート中...' : 'データダウンロード'}
       </button>
 
       <div className="section-label">今週のコメント</div>

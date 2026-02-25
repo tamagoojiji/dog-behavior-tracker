@@ -130,12 +130,16 @@ export interface ReminderState {
   countdown: number;      // 現フェーズの残り秒数
   totalRemaining: number; // 全体の残り秒数
   isRunning: boolean;
+  isPaused: boolean;
   start: (config: ReminderConfig) => void;
   stop: () => void;
+  pause: () => void;
+  resume: () => void;
 }
 
 export function useReminder(): ReminderState {
   const [isRunning, setIsRunning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [phase, setPhase] = useState<'behavior' | 'interval' | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
@@ -148,6 +152,9 @@ export function useReminder(): ReminderState {
   const totalEndRef = useRef(0);    // 全体の終了timestamp
   const timerRef = useRef<number>(0);
   const audioUnlockedRef = useRef(false);
+  // 一時停止時の残り時間を保持
+  const pausedPhaseRemainingRef = useRef(0);
+  const pausedTotalRemainingRef = useRef(0);
 
   const advancePhase = useCallback(() => {
     const schedule = scheduleRef.current;
@@ -222,12 +229,32 @@ export function useReminder(): ReminderState {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = 0;
     setIsRunning(false);
+    setIsPaused(false);
     setPhase(null);
     setCountdown(0);
     setTotalRemaining(0);
     scheduleRef.current = [];
     scheduleIdxRef.current = 0;
   }, []);
+
+  const pause = useCallback(() => {
+    if (!isRunning || isPaused) return;
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = 0;
+    const now = Date.now();
+    pausedPhaseRemainingRef.current = Math.max(0, phaseEndRef.current - now);
+    pausedTotalRemainingRef.current = Math.max(0, totalEndRef.current - now);
+    setIsPaused(true);
+  }, [isRunning, isPaused]);
+
+  const resume = useCallback(() => {
+    if (!isRunning || !isPaused) return;
+    const now = Date.now();
+    phaseEndRef.current = now + pausedPhaseRemainingRef.current;
+    totalEndRef.current = now + pausedTotalRemainingRef.current;
+    setIsPaused(false);
+    timerRef.current = window.setInterval(tick, 200);
+  }, [isRunning, isPaused, tick]);
 
   // クリーンアップ
   useEffect(() => {
@@ -243,7 +270,10 @@ export function useReminder(): ReminderState {
     countdown,
     totalRemaining,
     isRunning,
+    isPaused,
     start,
     stop,
+    pause,
+    resume,
   };
 }

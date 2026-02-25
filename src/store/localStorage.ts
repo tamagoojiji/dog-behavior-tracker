@@ -112,6 +112,14 @@ export function updateEvent(updated: BehaviorEvent): void {
   }
 }
 
+// セッション単体を削除（関連イベントも削除）
+export function removeSession(sessionId: string): void {
+  const sessions = getSessions().filter(s => s.id !== sessionId);
+  setItem(KEYS.sessions, sessions);
+  const events = getEvents().filter(e => e.sessionId !== sessionId);
+  setItem(KEYS.events, events);
+}
+
 // セッション・イベントのみクリア（犬データは保持）
 export function clearSessionData(): void {
   localStorage.removeItem(KEYS.sessions);
@@ -132,6 +140,11 @@ export function migrateData(): void {
     // durationOptions が未設定 → デフォルト値を設定
     if (!dog.durationOptions) {
       dog.durationOptions = [...DEFAULT_DURATIONS];
+      changed = true;
+    }
+    // latencyOptionsから-1（なし）を除去
+    if (dog.latencyOptions && dog.latencyOptions.includes(-1)) {
+      dog.latencyOptions = dog.latencyOptions.filter(l => l >= 0);
       changed = true;
     }
     // behaviorsByStimulus を削除（不要になった）

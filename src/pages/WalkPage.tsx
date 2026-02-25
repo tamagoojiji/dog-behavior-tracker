@@ -256,9 +256,9 @@ export default function WalkPage() {
 
               <div className="section-label">行動が出るまでの時間</div>
               <ButtonGrid
-                options={dog.latencyOptions.map(l => l === -1 ? 'なし' : `${l}秒`)}
-                selected={editLatency === null ? null : editLatency === -1 ? 'なし' : `${editLatency}秒`}
-                onSelect={v => setEditLatency(v === 'なし' ? -1 : Number(v.replace('秒', '')))}
+                options={dog.latencyOptions.filter(l => l >= 0).map(l => `${l}秒`)}
+                selected={editLatency === null ? null : `${editLatency}秒`}
+                onSelect={v => setEditLatency(Number(v.replace('秒', '')))}
                 columns={4}
               />
 

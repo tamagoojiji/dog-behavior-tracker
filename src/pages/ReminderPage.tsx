@@ -100,7 +100,7 @@ export default function ReminderPage() {
 
   return (
     <div className="page" style={{ paddingBottom: 16 }}>
-      <h1 className="page-title">リマインダー</h1>
+      <h1 className="page-title">タイマー</h1>
 
       {reminder.isRunning ? (
         /* === 実行中 === */
@@ -134,28 +134,45 @@ export default function ReminderPage() {
               </div>
               <div style={{
                 fontSize: 14,
-                color: 'var(--text-secondary)',
+                color: reminder.isPaused ? '#ff9800' : 'var(--text-secondary)',
                 marginTop: 12,
+                fontWeight: reminder.isPaused ? 600 : 400,
               }}>
-                残り {formatTimer(reminder.totalRemaining)}
+                {reminder.isPaused ? '⏸ 一時停止中' : `残り ${formatTimer(reminder.totalRemaining)}`}
               </div>
             </div>
           </div>
 
-          <button
-            className="btn btn-full"
-            style={{
-              marginTop: 16,
-              minHeight: 56,
-              background: 'var(--bg)',
-              border: '2px solid var(--danger)',
-              color: 'var(--danger)',
-              fontSize: 18,
-            }}
-            onClick={reminder.stop}
-          >
-            停止
-          </button>
+          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+            <button
+              className="btn btn-full"
+              style={{
+                flex: 1,
+                minHeight: 56,
+                background: reminder.isPaused ? 'var(--success)' : '#fff3e0',
+                border: reminder.isPaused ? 'none' : '2px solid #ff9800',
+                color: reminder.isPaused ? 'white' : '#ff9800',
+                fontSize: 18,
+              }}
+              onClick={reminder.isPaused ? reminder.resume : reminder.pause}
+            >
+              {reminder.isPaused ? '再開' : '一時停止'}
+            </button>
+            <button
+              className="btn btn-full"
+              style={{
+                flex: 1,
+                minHeight: 56,
+                background: 'var(--bg)',
+                border: '2px solid var(--danger)',
+                color: 'var(--danger)',
+                fontSize: 18,
+              }}
+              onClick={reminder.stop}
+            >
+              停止
+            </button>
+          </div>
         </>
       ) : (
         /* === 設定 === */
@@ -180,7 +197,7 @@ export default function ReminderPage() {
                 {unitToggle(rmTotalUnit, (u, v) => { setRmTotalUnit(u); setRmTotalTime(v); }, rmTotalTime)}
               </div>
               <div>
-                <label className="label" style={{ marginTop: 0 }}>平均行動時間</label>
+                <label className="label" style={{ marginTop: 0 }}>VR</label>
                 <input
                   className="input"
                   type="number"

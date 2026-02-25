@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { getActiveDog, getDogs, setActiveDogId, getSessionsByDog, getEventsByDog } from '../store/localStorage';
+import { getActiveDog, getDogs, setActiveDogId, getSessionsByDog, getEventsByDog, removeSession } from '../store/localStorage';
 import SummaryCard from '../components/SummaryCard';
 import SessionList from '../components/SessionList';
 import type { BehaviorEvent, Session } from '../types';
@@ -28,6 +28,7 @@ export default function HomePage() {
   const dog = activeDog;
   const allDogs = getDogs();
 
+  const [refreshKey, setRefreshKey] = useState(0);
   const { sessions, events, weekStats } = useMemo(() => {
     if (!dog) return { sessions: [], events: [], weekStats: { count: 0, avgLatency: null, avgDistance: null } };
     const sessions = getSessionsByDog(dog.id);
@@ -35,7 +36,7 @@ export default function HomePage() {
     const weekStart = getWeekStart();
     const weekEvents = events.filter(e => e.timestamp >= weekStart);
     return { sessions, events, weekStats: calcStats(weekEvents) };
-  }, [dog?.id]);
+  }, [dog?.id, refreshKey]);
 
   if (!dog) {
     return <Navigate to="/login" replace />;
@@ -43,6 +44,12 @@ export default function HomePage() {
 
   const handleSelectSession = (session: Session) => {
     navigate(`/walk-result/${session.id}`);
+  };
+
+  const handleDeleteSession = (session: Session) => {
+    if (!confirm('この散歩記録を削除しますか？')) return;
+    removeSession(session.id);
+    setRefreshKey(k => k + 1);
   };
 
   const handleSwitchDog = (id: string) => {
@@ -96,11 +103,11 @@ export default function HomePage() {
         }}
         onClick={() => navigate('/reminder')}
       >
-        ⏱ リマインダー
+        ⏱ タイマー
       </button>
 
       <div className="section-label">最近の散歩</div>
-      <SessionList sessions={sessions} events={events} onSelect={handleSelectSession} />
+      <SessionList sessions={sessions} events={events} onSelect={handleSelectSession} onDelete={handleDeleteSession} />
     </div>
   );
 }
