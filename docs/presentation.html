@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>犬の行動記録アプリ 使い方ガイド</title>
+<title>DogNote 使い方ガイド</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
 <style>
@@ -32,12 +32,11 @@
 .reveal h3 { font-size: 1em; color: var(--accent); margin-top: 0.2em; margin-bottom: 0.15em; }
 .reveal p, .reveal li { font-size: 0.7em; line-height: 1.5; }
 .reveal ul { list-style: none; padding-left: 0; margin: 0.2em 0; }
-.reveal ul li::before { content: "•"; color: var(--accent); font-weight: bold; margin-right: 0.5em; }
+.reveal ul li::before { content: "\2022"; color: var(--accent); font-weight: bold; margin-right: 0.5em; }
 .reveal ul li { margin-bottom: 0.15em; }
 .reveal .small { font-size: 0.55em; color: var(--gray); }
 .reveal section { text-align: left; }
 
-/* アクセントバッジ */
 .badge {
   display: inline-block;
   padding: 0.15em 0.6em;
@@ -53,7 +52,6 @@
 .badge-orange { background: var(--orange); }
 .badge-gray { background: var(--gray); }
 
-/* セクション仕切り */
 .section-divider {
   text-align: center !important;
 }
@@ -66,7 +64,6 @@
   margin-bottom: 0.3em;
 }
 
-/* スマホモックアップ */
 .phone-mock {
   width: 210px;
   min-height: 320px;
@@ -131,7 +128,7 @@
   border-top: 1px solid var(--gray-border);
   padding-top: 4px;
   margin-top: 4px;
-  font-size: 0.7em;
+  font-size: 0.65em;
   color: var(--gray);
 }
 .phone-nav span { text-align: center; }
@@ -151,6 +148,26 @@
   color: var(--gray);
   margin-top: 4px;
   display: block;
+}
+.phone-textarea {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--gray-border);
+  border-radius: 6px;
+  font-size: 0.85em;
+  margin: 3px 0;
+  box-sizing: border-box;
+  background: #fff;
+  min-height: 40px;
+  color: #333;
+}
+.phone-check {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8em;
+  margin: 4px 0;
+  color: #333;
 }
 .phone-grid {
   display: grid;
@@ -173,7 +190,6 @@
   border-color: var(--accent);
 }
 
-/* 2カラムレイアウト */
 .two-col {
   display: flex;
   gap: 20px;
@@ -187,7 +203,6 @@
   flex: 0 0 230px;
 }
 
-/* フロー図 */
 .flow-container {
   display: flex;
   flex-direction: column;
@@ -229,7 +244,6 @@
   background: var(--accent-light);
 }
 
-/* テーブル */
 .reveal table {
   font-size: 0.6em;
   width: 100%;
@@ -250,7 +264,6 @@
   background: var(--gray-light);
 }
 
-/* 番号付きステップ */
 .steps {
   counter-reset: step-counter;
   list-style: none;
@@ -277,7 +290,6 @@
   font-weight: 700;
 }
 
-/* FAQ */
 .faq-item {
   margin-bottom: 0.4em;
 }
@@ -293,7 +305,6 @@
   margin-top: 0.05em;
 }
 
-/* ポイントボックス */
 .point-box {
   background: var(--accent-light);
   border-left: 4px solid var(--accent);
@@ -306,8 +317,11 @@
   background: #fff3e0;
   border-left-color: var(--orange);
 }
+.point-box.success {
+  background: #e8f5e9;
+  border-left-color: var(--green);
+}
 
-/* コードブロック */
 .url-box {
   background: #1e293b;
   color: #e2e8f0;
@@ -319,7 +333,6 @@
   margin: 0.3em 0;
 }
 
-/* タイトルスライド */
 .title-slide {
   text-align: center !important;
 }
@@ -345,7 +358,6 @@
   color: #fff;
 }
 
-/* 管理画面モック */
 .admin-mock {
   background: #fff;
   border: 2px solid var(--gray-border);
@@ -375,6 +387,48 @@
 }
 .admin-card .name { font-weight: 600; }
 .admin-card .count { font-size: 1.4em; color: var(--accent); font-weight: 700; }
+
+.sheet-mock {
+  background: #fff;
+  border: 2px solid var(--gray-border);
+  border-radius: 8px;
+  font-size: 0.55em;
+  overflow: hidden;
+  margin: 0.3em 0;
+}
+.sheet-tabs {
+  display: flex;
+  background: #e8e8e8;
+  padding: 0;
+}
+.sheet-tab {
+  padding: 4px 10px;
+  font-size: 0.9em;
+  border-right: 1px solid var(--gray-border);
+  cursor: default;
+}
+.sheet-tab.active {
+  background: #fff;
+  font-weight: 600;
+  color: var(--accent-dark);
+}
+.sheet-body {
+  padding: 6px;
+}
+.sheet-body table {
+  width: 100%;
+  font-size: 1em;
+}
+.sheet-body table th {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  padding: 3px 6px;
+  font-size: 0.9em;
+}
+.sheet-body table td {
+  padding: 2px 6px;
+  font-size: 0.9em;
+}
 </style>
 </head>
 <body>
@@ -384,7 +438,7 @@
 <!-- ==================== 1. タイトル ==================== -->
 <section class="title-slide">
   <div class="app-icon">🐕</div>
-  <h1>犬の行動記録アプリ<br>使い方ガイド</h1>
+  <h1>DogNote<br>使い方ガイド</h1>
   <p class="subtitle">散歩中の行動を記録・分析・共有</p>
   <div class="url-box" style="max-width:500px;margin:0.5em auto;">
     https://dog-training-tracker.github.io/dog-behavior-tracker/
@@ -404,11 +458,11 @@
     <div class="point-box">
       <strong>📊 統計分析</strong><br>
       行動の推移をグラフ表示<br>
-      CSVダウンロードも可能
+      Excelダウンロードも可能
     </div>
     <div class="point-box">
-      <strong>👨‍🏫 指導者連携</strong><br>
-      データを指導者のシートに自動同期<br>
+      <strong>👨‍🏫 講師連携</strong><br>
+      データを講師に自動同期<br>
       離れていても状況を共有
     </div>
     <div class="point-box">
@@ -435,17 +489,59 @@
     </div>
     <div style="text-align:center;font-size:0.7em;color:var(--gray);">↕ データ自動同期</div>
     <div class="flow-row">
-      <div class="flow-label flow-label-instructor">指導者</div>
-      <div class="flow-box">管理画面</div>
+      <div class="flow-label flow-label-instructor">講師</div>
+      <div class="flow-box">講師ダッシュボード</div>
       <div class="flow-arrow">→</div>
       <div class="flow-box">生徒データ閲覧</div>
       <div class="flow-arrow">→</div>
-      <div class="flow-box">指導に活用</div>
+      <div class="flow-box">Excel出力</div>
     </div>
   </div>
   <div class="point-box" style="margin-top:0.6em;">
-    飼い主が記録 → 自動で指導者のGoogleスプレッドシートに同期<br>
-    指導者はシートまたは管理画面からデータを確認できます
+    飼い主が記録 → 自動で講師のスプレッドシートに同期<br>
+    講師はダッシュボードからデータ閲覧・Excelダウンロードが可能
+  </div>
+</section>
+
+<!-- ==================== 4. 画面構成まとめ ==================== -->
+<section>
+  <h2>画面構成</h2>
+  <h3>ナビゲーションバー（5タブ）</h3>
+  <div style="display:flex;justify-content:center;gap:6px;margin:0.4em 0;">
+    <div style="text-align:center;padding:8px 16px;background:var(--gray-light);border-radius:8px;font-size:0.65em;">
+      <div style="font-size:1.6em;">📊</div>統計
+    </div>
+    <div style="text-align:center;padding:8px 16px;background:var(--gray-light);border-radius:8px;font-size:0.65em;">
+      <div style="font-size:1.6em;">🏠</div>ホーム
+    </div>
+    <div style="text-align:center;padding:8px 16px;background:var(--gray-light);border-radius:8px;font-size:0.65em;">
+      <div style="font-size:1.6em;">⚙️</div>設定
+    </div>
+    <div style="text-align:center;padding:8px 16px;background:var(--gray-light);border-radius:8px;font-size:0.65em;">
+      <div style="font-size:1.6em;">📋</div>講師用
+    </div>
+    <div style="text-align:center;padding:8px 16px;background:var(--gray-light);border-radius:8px;font-size:0.65em;">
+      <div style="font-size:1.6em;">🔑</div>管理
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:0.4em;">
+    <div>
+      <h3>飼い主（生徒）が使う画面</h3>
+      <table>
+        <tr><th>タブ</th><th>機能</th></tr>
+        <tr><td>🏠 ホーム</td><td>散歩記録の開始・結果確認</td></tr>
+        <tr><td>📊 統計</td><td>行動分析・グラフ・Excel出力</td></tr>
+        <tr><td>⚙️ 設定</td><td>犬の管理・記録項目・同期</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>講師が使う画面</h3>
+      <table>
+        <tr><th>タブ</th><th>機能</th></tr>
+        <tr><td>📋 講師用</td><td>生徒一覧・データ閲覧・コメント・Excel出力</td></tr>
+        <tr><td>🔑 管理</td><td>指導者追加・ユーザー割当変更</td></tr>
+      </table>
+    </div>
   </div>
 </section>
 
@@ -456,7 +552,7 @@
   <p style="text-align:center;">散歩記録の使い方</p>
 </section>
 
-<!-- ==================== 4. 初期セットアップ ==================== -->
+<!-- ==================== 5. 初期セットアップ ==================== -->
 <section>
   <h2>初期セットアップ</h2>
   <div class="two-col">
@@ -464,13 +560,13 @@
       <ol class="steps">
         <li><strong>犬の名前</strong>と<strong>目標</strong>を入力<br>
           <span class="small">例: ポチ / 犬への反応を減らす</span></li>
-        <li><strong>指導者連携</strong>（オプション）<br>
-          <span class="small">指導者から共有された GAS URL とメールアドレスを入力</span></li>
-        <li><strong>指導者を選択</strong>してリスト<br>
-          <span class="small">担当の指導者を選んで「登録する」</span></li>
+        <li><strong>講師連携</strong>（オプション）<br>
+          <span class="small">講師から共有された GAS URL とメールアドレスを入力</span></li>
+        <li><strong>講師を選択</strong>して登録<br>
+          <span class="small">担当の講師を選んで「登録する」</span></li>
       </ol>
       <div class="point-box warn">
-        指導者連携は後からでも設定画面で設定できます
+        講師連携は後からでも設定画面で設定できます
       </div>
     </div>
     <div class="col-phone">
@@ -481,7 +577,7 @@
           <div class="phone-input">ポチ</div>
           <span class="phone-label">目標</span>
           <div class="phone-input">犬への反応を減らす</div>
-          <span class="phone-label">GAS URL（指導者から共有）</span>
+          <span class="phone-label">GAS URL（講師から共有）</span>
           <div class="phone-input" style="font-size:0.7em;color:#999;">https://script.google...</div>
           <span class="phone-label">メールアドレス</span>
           <div class="phone-input">example@mail.com</div>
@@ -493,7 +589,7 @@
   </div>
 </section>
 
-<!-- ==================== 5. ホーム画面 ==================== -->
+<!-- ==================== 6. ホーム画面 ==================== -->
 <section>
   <h2>ホーム画面</h2>
   <div class="two-col">
@@ -502,12 +598,12 @@
       <ul>
         <li><strong>犬の名前</strong>と目標</li>
         <li><strong>今週のサマリー</strong>: 記録件数・平均潜時・平均距離</li>
-        <li><strong>最近の散歩</strong>一覧（タップで詳細へ）</li>
+        <li><strong>記録歴</strong>一覧（タップで詳細へ）</li>
       </ul>
       <h3>メインアクション</h3>
       <ul>
         <li><span class="badge badge-blue">記録開始</span> 散歩の記録を開始</li>
-        <li><span class="badge badge-green">リマインダー</span> インターバルタイマー</li>
+        <li><span class="badge badge-green">タイマー</span> インターバルタイマー</li>
       </ul>
       <div class="point-box">
         複数の犬を登録している場合は<br>犬の切り替えボタンで選択できます
@@ -534,8 +630,8 @@
             </div>
           </div>
           <div class="phone-btn phone-btn-blue">🚶 記録開始</div>
-          <div class="phone-btn phone-btn-green">⏱ リマインダー</div>
-          <div style="font-size:0.8em;font-weight:600;margin-top:6px;">最近の散歩</div>
+          <div class="phone-btn phone-btn-green">⏱ タイマー</div>
+          <div style="font-size:0.8em;font-weight:600;margin-top:6px;">記録歴</div>
           <div class="phone-card">2/24 14:30 — 5件</div>
           <div class="phone-card">2/23 10:15 — 3件</div>
         </div>
@@ -543,6 +639,7 @@
           <span>📊 統計</span>
           <span class="active">🏠 ホーム</span>
           <span>⚙️ 設定</span>
+          <span>📋 講師用</span>
           <span>🔑 管理</span>
         </div>
       </div>
@@ -550,7 +647,7 @@
   </div>
 </section>
 
-<!-- ==================== 6. 散歩記録 ==================== -->
+<!-- ==================== 7. 散歩記録 ==================== -->
 <section>
   <h2>散歩記録</h2>
   <div class="two-col">
@@ -604,7 +701,7 @@
   </div>
 </section>
 
-<!-- ==================== 7. 散歩結果 ==================== -->
+<!-- ==================== 8. 散歩結果 ==================== -->
 <section>
   <h2>散歩結果</h2>
   <div class="two-col">
@@ -651,7 +748,7 @@
   </div>
 </section>
 
-<!-- ==================== 8. 統計画面 ==================== -->
+<!-- ==================== 9. 統計画面 ==================== -->
 <section>
   <h2>統計画面</h2>
   <div class="two-col">
@@ -669,15 +766,15 @@
       </ul>
       <h3>データ出力</h3>
       <ul>
-        <li><span class="badge badge-blue">CSVダウンロード</span><br>
-          <span class="small">日時・刺激・行動・潜時・距離・コメント</span></li>
+        <li><span class="badge badge-blue">データダウンロード</span><br>
+          <span class="small">Excelファイル（.xlsx）で直接ダウンロード<br>日時・刺激・行動・潜時・距離・コメント</span></li>
       </ul>
     </div>
     <div class="col-phone">
       <div class="phone-mock">
         <div class="phone-header">📊 統計</div>
         <div class="phone-body">
-          <div class="phone-btn phone-btn-blue" style="font-size:0.8em;">📥 CSVダウンロード</div>
+          <div class="phone-btn phone-btn-blue" style="font-size:0.8em;">📥 データダウンロード</div>
           <div class="phone-card">
             <div style="font-weight:600;">今週のコメント</div>
             <div style="font-size:0.8em;">今週は12件の記録（4回の散歩）。最も多い行動は「吠え」。</div>
@@ -702,6 +799,7 @@
           <span class="active">📊 統計</span>
           <span>🏠 ホーム</span>
           <span>⚙️ 設定</span>
+          <span>📋 講師用</span>
           <span>🔑 管理</span>
         </div>
       </div>
@@ -709,7 +807,7 @@
   </div>
 </section>
 
-<!-- ==================== 9. 設定画面 ==================== -->
+<!-- ==================== 10. 設定画面 ==================== -->
 <section>
   <h2>設定画面</h2>
   <div class="two-col">
@@ -723,7 +821,7 @@
         <tr><th>項目</th><th>初期値</th></tr>
         <tr><td>SD（刺激）</td><td>犬, 人, 自転車, 車, 音, その他</td></tr>
         <tr><td>行動</td><td>吠え, 突進, 固まる, 回避, 引張り, AC</td></tr>
-        <tr><td>潜時</td><td>0〜5秒, なし</td></tr>
+        <tr><td>行動が出るまでの時間</td><td>0〜5秒, なし</td></tr>
         <tr><td>距離</td><td>1〜50m（段階的）</td></tr>
       </table>
       <div class="point-box">
@@ -763,6 +861,7 @@
           <span>📊 統計</span>
           <span>🏠 ホーム</span>
           <span class="active">⚙️ 設定</span>
+          <span>📋 講師用</span>
           <span>🔑 管理</span>
         </div>
       </div>
@@ -770,9 +869,9 @@
   </div>
 </section>
 
-<!-- ==================== 10. リマインダー ==================== -->
+<!-- ==================== 11. タイマー ==================== -->
 <section>
-  <h2>リマインダー</h2>
+  <h2>タイマー</h2>
   <div class="two-col">
     <div class="col-text">
       <h3>インターバルタイマー機能</h3>
@@ -782,16 +881,17 @@
         <tr><th>項目</th><th>説明</th></tr>
         <tr><td>上限時間</td><td>トレーニング全体の時間</td></tr>
         <tr><td>行動回数</td><td>繰り返す回数</td></tr>
-        <tr><td>平均行動時間</td><td>1回の行動フェーズの長さ</td></tr>
+        <tr><td>VR</td><td>1回の行動フェーズの長さ</td></tr>
         <tr><td>インターバル上限</td><td>インターバルの最大時間</td></tr>
       </table>
       <div class="point-box">
-        3つ入力 → 残り1つが<strong>自動計算</strong> ／ 画面は常にオン
+        3つ入力 → 残り1つが<strong>自動計算</strong><br>
+        一時停止ボタンで途中停止も可能 ／ 画面は常にオン
       </div>
     </div>
     <div class="col-phone">
       <div class="phone-mock">
-        <div class="phone-header">⏱ リマインダー</div>
+        <div class="phone-header">⏱ タイマー</div>
         <div class="phone-body">
           <div style="background:var(--green);color:#fff;border-radius:8px;padding:8px;text-align:center;margin:6px 0;">
             <div style="font-size:0.85em;">行動 2 / 5</div>
@@ -801,13 +901,16 @@
           <div style="text-align:center;font-size:0.8em;color:var(--gray);margin:4px 0;">
             残り 02:30
           </div>
-          <div class="phone-btn phone-btn-red">停止</div>
+          <div style="display:flex;gap:4px;">
+            <div class="phone-btn phone-btn-gray" style="flex:1;">⏸ 一時停止</div>
+            <div class="phone-btn phone-btn-red" style="flex:1;">停止</div>
+          </div>
           <div style="margin-top:8px;border-top:1px solid var(--gray-border);padding-top:6px;">
             <div style="font-size:0.8em;font-weight:600;margin-bottom:4px;">設定例:</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:0.8em;">
               <div class="phone-card">上限: 5分</div>
               <div class="phone-card">回数: 5回</div>
-              <div class="phone-card">行動: 20秒</div>
+              <div class="phone-card">VR: 20秒</div>
               <div class="phone-card" style="background:#fff3e0;">IV: 自動</div>
             </div>
           </div>
@@ -817,14 +920,14 @@
   </div>
 </section>
 
-<!-- ==================== セクション仕切り：指導者向け ==================== -->
+<!-- ==================== セクション仕切り：講師向け ==================== -->
 <section class="section-divider">
   <div class="icon">👨‍🏫</div>
-  <h2>指導者向け</h2>
-  <p style="text-align:center;">管理画面の使い方</p>
+  <h2>講師向け</h2>
+  <p style="text-align:center;">管理画面・講師ダッシュボードの使い方</p>
 </section>
 
-<!-- ==================== 11. 管理画面へのアクセス ==================== -->
+<!-- ==================== 12. 管理画面へのアクセス ==================== -->
 <section>
   <h2>管理画面へのアクセス</h2>
   <h3>アクセス方法</h3>
@@ -835,13 +938,17 @@
     <li><strong>Adminパスワード</strong> を入力してログイン<br>
       <span class="small">※ パスワードは初期セットアップ時に自動生成されます</span></li>
   </ol>
+  <div class="point-box">
+    「<strong>パスワードを保存</strong>」にチェックすると、次回以降は自動ログインできます。<br>
+    管理画面でログイン済みなら、講師用タブでもPW入力不要です。
+  </div>
   <div class="point-box warn">
-    タブを閉じると再ログインが必要です（パスワード自体は変わりません）<br>
-    GAS URLとパスワードは指導者間で共有してください
+    共有端末（複数人で使うPC等）では「パスワードを保存」はオフのままにしてください。<br>
+    GAS URLとパスワードは講師間で共有してください。
   </div>
 </section>
 
-<!-- ==================== 12. 指導者管理 ==================== -->
+<!-- ==================== 13. 指導者管理 ==================== -->
 <section>
   <h2>指導者管理</h2>
   <div class="two-col">
@@ -888,7 +995,7 @@
   </div>
 </section>
 
-<!-- ==================== 13. ユーザー管理 ==================== -->
+<!-- ==================== 14. ユーザー管理 ==================== -->
 <section>
   <h2>ユーザー管理</h2>
   <div class="two-col">
@@ -925,7 +1032,181 @@
   </div>
 </section>
 
-<!-- ==================== 14. 生徒への説明ポイント ==================== -->
+<!-- ==================== 15. 講師ダッシュボード ==================== -->
+<section>
+  <h2>講師ダッシュボード</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>ナビバーの「講師用」タブからアクセス</h3>
+      <ul>
+        <li>管理画面でログイン済みなら<strong>PW入力不要</strong></li>
+        <li>講師名を選んで生徒一覧へ</li>
+      </ul>
+      <h3>生徒一覧画面</h3>
+      <ul>
+        <li>担当する<strong>全生徒</strong>をカード表示</li>
+        <li>犬名・散歩回数・記録数・最終同期日を一覧確認</li>
+        <li>タップで生徒の詳細データへ</li>
+      </ul>
+      <h3>全生徒Excel出力</h3>
+      <ul>
+        <li>「全生徒データをExcel出力」ボタンで一括ダウンロード</li>
+        <li>サマリーシート + 生徒別シートの構成</li>
+      </ul>
+      <div class="point-box">
+        <strong>管理画面</strong> = 指導者・ユーザーの追加/変更<br>
+        <strong>講師用</strong> = 生徒データの閲覧・コメント・Excel出力
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">📋 講師ダッシュボード</div>
+        <div class="phone-body">
+          <div style="font-weight:600;font-size:0.95em;margin-bottom:4px;">田中先生の生徒</div>
+          <div class="phone-card" style="border-left:3px solid var(--accent);">
+            <div style="font-weight:600;">ポチ</div>
+            <div style="font-size:0.8em;color:var(--gray);">散歩 12回 / 記録 48件</div>
+          </div>
+          <div class="phone-card" style="border-left:3px solid var(--accent);">
+            <div style="font-weight:600;">ハナ</div>
+            <div style="font-size:0.8em;color:var(--gray);">散歩 8回 / 記録 32件</div>
+          </div>
+          <div class="phone-card" style="border-left:3px solid var(--accent);">
+            <div style="font-weight:600;">コロ</div>
+            <div style="font-size:0.8em;color:var(--gray);">散歩 5回 / 記録 20件</div>
+          </div>
+          <div class="phone-btn phone-btn-blue" style="margin-top:6px;">全生徒データをExcel出力</div>
+          <div class="phone-btn phone-btn-gray">一覧を更新</div>
+        </div>
+        <div class="phone-nav">
+          <span>📊 統計</span>
+          <span>🏠 ホーム</span>
+          <span>⚙️ 設定</span>
+          <span class="active">📋 講師用</span>
+          <span>🔑 管理</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 16. 生徒詳細・コメント・Excel出力 ==================== -->
+<section>
+  <h2>生徒詳細・講師コメント</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>生徒詳細画面で見られること</h3>
+      <ul>
+        <li><strong>今週のコメント</strong>（自動生成）</li>
+        <li><strong>全体サマリー</strong>（記録数・平均潜時・平均距離）</li>
+      </ul>
+      <h3>講師コメント機能</h3>
+      <ul>
+        <li>生徒ごとにコメントを入力・<strong>サーバーに永続保存</strong></li>
+        <li>次回開いた時も保存済みコメントが表示</li>
+      </ul>
+      <h3>個別Excel出力</h3>
+      <ul>
+        <li>「Excelに出力」で生徒の全行動記録をダウンロード</li>
+        <li>日時・刺激・行動・潜時・距離・コメントの6列</li>
+      </ul>
+      <div class="point-box success">
+        コメントは講師のGoogleスプレッドシートに保存されるため、<br>
+        端末を変えても・ブラウザを閉じても消えません。
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">🐕 ポチ</div>
+        <div class="phone-body">
+          <div style="font-size:0.8em;font-weight:600;margin-bottom:2px;">今週のコメント</div>
+          <div class="phone-card" style="font-size:0.8em;">
+            今週は12件の記録（4回の散歩）。<br>
+            平均潜時は1.8秒。
+          </div>
+          <div style="font-size:0.8em;font-weight:600;margin-top:4px;">全体サマリー</div>
+          <div style="display:flex;gap:3px;margin:3px 0;">
+            <div class="phone-card" style="flex:1;text-align:center;">
+              <div style="font-weight:700;color:var(--accent);">48</div>
+              <div style="font-size:0.7em;">記録</div>
+            </div>
+            <div class="phone-card" style="flex:1;text-align:center;">
+              <div style="font-weight:700;color:var(--accent);">1.8秒</div>
+              <div style="font-size:0.7em;">潜時</div>
+            </div>
+          </div>
+          <div style="font-size:0.8em;font-weight:600;margin-top:4px;color:var(--green);">講師コメント</div>
+          <div class="phone-textarea">犬への反応が減少傾向。来週は距離5mで練習。</div>
+          <div style="display:flex;gap:4px;align-items:center;margin:2px 0;">
+            <div class="phone-btn phone-btn-blue" style="width:auto;padding:4px 12px;margin:0;">保存</div>
+            <span style="font-size:0.8em;color:var(--green);">保存しました</span>
+          </div>
+          <div class="phone-btn phone-btn-blue" style="margin-top:6px;">Excelに出力</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 17. Excel出力の詳細 ==================== -->
+<section>
+  <h2>Excel出力の詳細</h2>
+  <h3>2種類のExcel出力</h3>
+  <table>
+    <tr><th>ボタン</th><th>出力内容</th><th>場所</th></tr>
+    <tr><td>全生徒データをExcel出力</td><td>全生徒まとめて1ファイル</td><td>生徒一覧画面</td></tr>
+    <tr><td>Excelに出力</td><td>選択した生徒のみ</td><td>生徒詳細画面</td></tr>
+  </table>
+  <h3 style="margin-top:0.4em;">全生徒Excelの構成</h3>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="col-text" style="flex:1;">
+      <ul>
+        <li><strong>サマリーシート</strong>: 犬名・散歩回数・記録数・平均潜時・平均距離</li>
+        <li><strong>生徒別シート</strong>: 各生徒の全行動記録</li>
+      </ul>
+      <div class="point-box">
+        ボタンを押すと<strong>Excelファイル（.xlsx）が直接ダウンロード</strong>されます。<br>
+        スマホ・PCどちらでもExcelやGoogleスプレッドシートで開けます。
+      </div>
+    </div>
+    <div style="flex:0 0 340px;">
+      <div class="sheet-mock">
+        <div class="sheet-tabs">
+          <div class="sheet-tab active">サマリー</div>
+          <div class="sheet-tab">ポチ</div>
+          <div class="sheet-tab">ハナ</div>
+          <div class="sheet-tab">コロ</div>
+        </div>
+        <div class="sheet-body">
+          <table>
+            <tr><th>犬名</th><th>散歩</th><th>記録</th><th>潜時</th><th>距離</th></tr>
+            <tr><td>ポチ</td><td>12</td><td>48</td><td>1.8秒</td><td>8m</td></tr>
+            <tr><td>ハナ</td><td>8</td><td>32</td><td>2.5秒</td><td>10m</td></tr>
+            <tr><td>コロ</td><td>5</td><td>20</td><td>3.1秒</td><td>12m</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="sheet-mock" style="margin-top:8px;">
+        <div class="sheet-tabs">
+          <div class="sheet-tab">サマリー</div>
+          <div class="sheet-tab active">ポチ</div>
+          <div class="sheet-tab">ハナ</div>
+          <div class="sheet-tab">コロ</div>
+        </div>
+        <div class="sheet-body">
+          <table>
+            <tr><th>日時</th><th>刺激</th><th>行動</th><th>潜時</th><th>距離</th></tr>
+            <tr><td>2/25 14:32</td><td>犬</td><td>吠え</td><td>2秒</td><td>5m</td></tr>
+            <tr><td>2/25 14:35</td><td>人</td><td>AC</td><td>1秒</td><td>10m</td></tr>
+            <tr><td>2/24 10:15</td><td>犬</td><td>突進</td><td>3秒</td><td>3m</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 18. 生徒への説明ポイント ==================== -->
 <section>
   <h2>生徒への説明ポイント</h2>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
@@ -952,7 +1233,7 @@
   </div>
 </section>
 
-<!-- ==================== 15. FAQ ==================== -->
+<!-- ==================== 19. FAQ ==================== -->
 <section>
   <h2>よくある質問（FAQ）</h2>
   <div class="faq-item">
@@ -972,16 +1253,16 @@
     <div class="faq-a">A. 散歩中は「誤タップ取消」、散歩後は結果画面で各記録をタップして編集できます。</div>
   </div>
   <div class="faq-item">
-    <div class="faq-q">Q. 指導者側でデータはどこに保存されますか？</div>
-    <div class="faq-a">A. 指導者ごとのGoogleスプレッドシートに自動保存されます。Googleドライブから確認できます。</div>
+    <div class="faq-q">Q. データのダウンロードはどの形式ですか？</div>
+    <div class="faq-a">A. Excelファイル（.xlsx）で直接ダウンロードされます。PCでもスマホでも開けます。</div>
   </div>
   <div class="faq-item">
     <div class="faq-q">Q. メールアドレスは安全ですか？</div>
-    <div class="faq-a">A. メールアドレスは暗号化（ハッシュ化）されて送信されます。指導者側でも元のアドレスは見えません。</div>
+    <div class="faq-a">A. メールアドレスは暗号化（ハッシュ化）されて送信されます。講師側でも元のアドレスは見えません。</div>
   </div>
 </section>
 
-<!-- ==================== 16. まとめ・URL共有 ==================== -->
+<!-- ==================== 20. まとめ・URL共有 ==================== -->
 <section class="title-slide">
   <h2 style="margin-bottom:0.5em;">まとめ</h2>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;max-width:600px;margin:0 auto 0.8em;text-align:center;">
