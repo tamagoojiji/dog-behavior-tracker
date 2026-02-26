@@ -1,7 +1,7 @@
-import { useMemo, useCallback, useState } from 'react';
+import { useMemo, useCallback } from 'react';
 import { getActiveDog, getEventsByDog, getSessionsByDog } from '../store/localStorage';
-import { getGasUrl } from '../store/syncService';
 import { Navigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 import SummaryCard from '../components/SummaryCard';
 import { generateWeeklyComments } from '../utils/weeklyComments';
 import {
@@ -90,65 +90,24 @@ export default function StatsPage() {
     return { count, avgLatency, avgDistance, sessionCount: sessions.length, byStimulus, sortedBehaviors, comments };
   }, [dog?.id]);
 
-  const [exporting, setExporting] = useState(false);
-
-  const handleDataDownload = useCallback(async () => {
+  const handleDataDownload = useCallback(() => {
     if (!dog) return;
     const events = getEventsByDog(dog.id);
-    const gasUrl = getGasUrl();
 
-    // GAS接続あり → スプレッドシートへエクスポート
-    if (gasUrl) {
-      setExporting(true);
-      try {
-        const response = await fetch(gasUrl, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'exportToSheet',
-            dogName: dog.name,
-            events: events,
-          }),
-          redirect: 'follow',
-        });
-        const result = await response.json() as { success: boolean; data?: { url: string }; error?: { message: string } };
-        if (result.success && result.data?.url) {
-          window.open(result.data.url, '_blank');
-        } else {
-          alert('エクスポートに失敗しました: ' + (result.error?.message || '不明なエラー'));
-        }
-      } catch {
-        alert('通信エラーが発生しました。CSV形式でダウンロードします。');
-        downloadCsv(dog.name, events);
-      } finally {
-        setExporting(false);
-      }
-    } else {
-      // GAS未接続 → CSV
-      downloadCsv(dog.name, events);
-    }
+    const rows = events.map(e => ({
+      '日時': formatDateFull(e.timestamp),
+      '刺激': e.stimulus,
+      '行動': e.behavior ?? '',
+      '潜時(秒)': e.latency !== null ? (e.latency === -1 ? 'なし' : e.latency) : '',
+      '距離(m)': e.distance !== null ? e.distance : '',
+      'コメント': e.comment ?? '',
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '行動記録');
+    XLSX.writeFile(wb, `${dog.name}_行動記録.xlsx`);
   }, [dog]);
-
-  function downloadCsv(dogName: string, events: import('../types').BehaviorEvent[]) {
-    const bom = '\uFEFF';
-    const header = '日時,刺激,行動,潜時(秒),距離(m),コメント';
-    const rows = events.map(e => {
-      const date = formatDateFull(e.timestamp);
-      const stimulus = e.stimulus;
-      const behavior = e.behavior ?? '';
-      const latency = e.latency !== null ? (e.latency === -1 ? 'なし' : String(e.latency)) : '';
-      const distance = e.distance !== null ? String(e.distance) : '';
-      const comment = (e.comment ?? '').replace(/"/g, '""');
-      return `${date},${stimulus},${behavior},${latency},${distance},"${comment}"`;
-    });
-    const csv = bom + header + '\n' + rows.join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${dogName}_行動記録.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
 
   if (!dog) {
     return <Navigate to="/login" replace />;
@@ -173,9 +132,8 @@ export default function StatsPage() {
         className="btn btn-primary btn-full"
         style={{ marginBottom: 12 }}
         onClick={handleDataDownload}
-        disabled={exporting}
       >
-        {exporting ? 'エクスポート中...' : 'データダウンロード'}
+        データダウンロード
       </button>
 
       <div className="section-label">今週のコメント</div>

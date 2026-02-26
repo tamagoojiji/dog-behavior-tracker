@@ -117,7 +117,7 @@ export default function HomePage() {
       </button>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="section-label" style={{ marginBottom: 0 }}>最近の散歩</div>
+        <div className="section-label" style={{ marginBottom: 0 }}>記録歴</div>
         {sessions.length > 0 && (
           <button
             style={{

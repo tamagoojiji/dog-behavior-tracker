@@ -4,13 +4,12 @@ import {
   fetchAdminInstructors,
   fetchInstructorStudents,
   fetchStudentData,
-  exportStudentSheet,
-  exportAllStudentsSheet,
   saveInstructorComment,
   fetchInstructorComment,
 } from '../store/syncService';
 import { generateWeeklyComments } from '../utils/weeklyComments';
 import SummaryCard from '../components/SummaryCard';
+import * as XLSX from 'xlsx';
 
 type View = 'login' | 'students' | 'detail';
 
@@ -36,9 +35,7 @@ export default function InstructorPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
-  const [exportUrl, setExportUrl] = useState('');
   const [exportingAll, setExportingAll] = useState(false);
-  const [exportAllUrl, setExportAllUrl] = useState('');
   const [loginStep, setLoginStep] = useState<'password' | 'instructor'>('password');
   // 講師コメント
   const [instructorComment, setInstructorComment] = useState('');
@@ -126,7 +123,6 @@ export default function InstructorPage() {
     setSelectedStudent(student);
     setLoading(true);
     setError('');
-    setExportUrl('');
     setCommentSaved(false);
     try {
       const [data, comment] = await Promise.all([
@@ -145,26 +141,79 @@ export default function InstructorPage() {
     }
   };
 
-  const handleExport = async () => {
-    if (!selectedStudent) return;
+  const formatDateFull = (ts: number) => {
+    const d = new Date(ts);
+    return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+  };
+
+  const eventsToRows = (events: BehaviorEvent[]) =>
+    events.map(e => ({
+      '日時': formatDateFull(e.timestamp),
+      '刺激': e.stimulus,
+      '行動': e.behavior ?? '',
+      '潜時(秒)': e.latency !== null ? (e.latency === -1 ? 'なし' : e.latency) : '',
+      '距離(m)': e.distance !== null ? e.distance : '',
+      'コメント': e.comment ?? '',
+    }));
+
+  const handleExport = () => {
+    if (!selectedStudent || studentEvents.length === 0) return;
     setExporting(true);
-    setExportUrl('');
     try {
-      const result = await exportStudentSheet(selectedStudent.emailHash, password);
-      setExportUrl(result.url);
-    } catch (e) {
-      alert('エクスポート失敗: ' + (e instanceof Error ? e.message : '不明なエラー'));
+      const ws = XLSX.utils.json_to_sheet(eventsToRows(studentEvents));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '行動記録');
+      XLSX.writeFile(wb, `${selectedStudent.dogName}_行動記録.xlsx`);
     } finally {
       setExporting(false);
     }
   };
 
   const handleExportAll = async () => {
+    if (students.length === 0) return;
     setExportingAll(true);
-    setExportAllUrl('');
     try {
-      const result = await exportAllStudentsSheet(instructorId, password);
-      setExportAllUrl(result.url);
+      const wb = XLSX.utils.book_new();
+
+      // サマリーシート
+      const summaryRows: Record<string, string | number>[] = [];
+
+      for (const s of students) {
+        const data = await fetchStudentData(s.emailHash, password);
+        const events = data.events;
+        const sessions = data.sessions;
+
+        // サマリー集計
+        const latencies = events.filter(e => e.latency !== null && e.latency >= 0).map(e => e.latency!);
+        const avgLat = latencies.length > 0 ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length * 10) / 10 : '';
+        const distances = events.filter(e => e.distance !== null).map(e => e.distance!);
+        const avgDist = distances.length > 0 ? Math.round(distances.reduce((a, b) => a + b, 0) / distances.length) : '';
+
+        summaryRows.push({
+          '犬名': s.dogName,
+          '散歩回数': sessions.length,
+          '記録数': events.length,
+          '平均潜時(秒)': avgLat,
+          '平均距離(m)': avgDist,
+        });
+
+        // 生徒別シート
+        if (events.length > 0) {
+          const ws = XLSX.utils.json_to_sheet(eventsToRows(events));
+          XLSX.utils.book_append_sheet(wb, ws, s.dogName.slice(0, 31));
+        }
+      }
+
+      // サマリーを先頭に挿入
+      const summaryWs = XLSX.utils.json_to_sheet(summaryRows);
+      XLSX.utils.book_append_sheet(wb, summaryWs, 'サマリー');
+      // サマリーを先頭に移動
+      const names = wb.SheetNames;
+      names.unshift(names.pop()!);
+
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      XLSX.writeFile(wb, `全生徒_行動記録_${dateStr}.xlsx`);
     } catch (e) {
       alert('エクスポート失敗: ' + (e instanceof Error ? e.message : '不明なエラー'));
     } finally {
@@ -346,22 +395,8 @@ export default function InstructorPage() {
               onClick={handleExportAll}
               disabled={exportingAll}
             >
-              {exportingAll ? 'エクスポート中...' : '全生徒をスプシに出力'}
+              {exportingAll ? 'エクスポート中...' : '全生徒データをExcel出力'}
             </button>
-            {exportAllUrl && (
-              <a
-                href={exportAllUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'block', marginTop: 8, padding: 12, fontSize: 14,
-                  textAlign: 'center', color: 'var(--primary)', wordBreak: 'break-all',
-                  background: 'var(--bg-secondary)', borderRadius: 8,
-                }}
-              >
-                スプレッドシートを開く
-              </a>
-            )}
           </>
         )}
 
@@ -455,22 +490,8 @@ export default function InstructorPage() {
             onClick={handleExport}
             disabled={exporting}
           >
-            {exporting ? 'エクスポート中...' : 'スプレッドシートに出力'}
+            {exporting ? 'エクスポート中...' : 'Excelに出力'}
           </button>
-          {exportUrl && (
-            <a
-              href={exportUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'block', marginTop: 8, padding: 12, fontSize: 14,
-                textAlign: 'center', color: 'var(--primary)', wordBreak: 'break-all',
-                background: 'var(--bg-secondary)', borderRadius: 8,
-              }}
-            >
-              スプレッドシートを開く
-            </a>
-          )}
         </>
       )}
     </div>
