@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DogNote アップデートのご案内</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+:root {
+  --accent: #4a90d9;
+  --accent-light: #e8f0fe;
+  --accent-dark: #2c5f8a;
+  --green: #4caf50;
+  --red: #e74c3c;
+  --orange: #ff9800;
+  --gray: #6b7280;
+  --gray-light: #f3f4f6;
+  --gray-border: #d1d5db;
+}
+.reveal {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+.reveal h1, .reveal h2, .reveal h3 {
+  color: var(--accent-dark);
+  text-transform: none;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.reveal h1 { font-size: 2em; }
+.reveal h2 { font-size: 1.4em; margin-bottom: 0.25em; }
+.reveal h3 { font-size: 1em; color: var(--accent); margin-top: 0.2em; margin-bottom: 0.15em; }
+.reveal p, .reveal li { font-size: 0.7em; line-height: 1.5; }
+.reveal ul { list-style: none; padding-left: 0; margin: 0.2em 0; }
+.reveal ul li::before { content: "\2022"; color: var(--accent); font-weight: bold; margin-right: 0.5em; }
+.reveal ul li { margin-bottom: 0.15em; }
+.reveal .small { font-size: 0.55em; color: var(--gray); }
+.reveal section { text-align: left; }
+
+.badge {
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  font-size: 0.65em;
+  font-weight: 600;
+  color: #fff;
+  margin: 0.1em;
+}
+.badge-blue { background: var(--accent); }
+.badge-green { background: var(--green); }
+.badge-red { background: var(--red); }
+.badge-orange { background: var(--orange); }
+.badge-gray { background: var(--gray); }
+.badge-new { background: var(--green); font-size: 0.6em; vertical-align: middle; }
+
+.section-divider {
+  text-align: center !important;
+}
+.section-divider h2 {
+  font-size: 1.8em;
+  margin-bottom: 0.3em;
+}
+.section-divider .icon {
+  font-size: 3em;
+  margin-bottom: 0.3em;
+}
+
+.phone-mock {
+  width: 210px;
+  min-height: 320px;
+  border: 3px solid #333;
+  border-radius: 24px;
+  padding: 10px 8px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  font-size: 0.5em;
+}
+.phone-mock::before {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 5px;
+  background: #333;
+  border-radius: 3px;
+  margin: 0 auto 6px;
+}
+.phone-header {
+  background: var(--accent);
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 6px 6px 0 0;
+  font-weight: 600;
+  font-size: 0.95em;
+  text-align: center;
+}
+.phone-body {
+  padding: 4px;
+}
+.phone-btn {
+  display: block;
+  width: 100%;
+  padding: 6px;
+  margin: 3px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+  cursor: default;
+}
+.phone-btn-blue { background: var(--accent); }
+.phone-btn-red { background: var(--red); }
+.phone-btn-green { background: var(--green); }
+.phone-btn-gray { background: var(--gray-light); color: #333; }
+.phone-card {
+  background: var(--gray-light);
+  border-radius: 8px;
+  padding: 4px 6px;
+  margin: 3px 0;
+  font-size: 0.85em;
+}
+.phone-nav {
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid var(--gray-border);
+  padding-top: 4px;
+  margin-top: 4px;
+  font-size: 0.65em;
+  color: var(--gray);
+}
+.phone-nav span { text-align: center; }
+.phone-nav .active { color: var(--accent); font-weight: 600; }
+.phone-nav .new-badge { color: var(--green); font-weight: 600; }
+.phone-input {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--gray-border);
+  border-radius: 6px;
+  font-size: 0.85em;
+  margin: 3px 0;
+  box-sizing: border-box;
+  background: #fff;
+}
+.phone-label {
+  font-size: 0.75em;
+  color: var(--gray);
+  margin-top: 4px;
+  display: block;
+}
+.phone-textarea {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--gray-border);
+  border-radius: 6px;
+  font-size: 0.85em;
+  margin: 3px 0;
+  box-sizing: border-box;
+  background: #fff;
+  min-height: 40px;
+  color: #333;
+}
+.phone-link {
+  display: block;
+  background: var(--accent-light);
+  color: var(--accent);
+  text-align: center;
+  padding: 5px;
+  border-radius: 6px;
+  margin: 3px 0;
+  font-size: 0.8em;
+  text-decoration: underline;
+}
+.phone-check {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8em;
+  margin: 4px 0;
+  color: #333;
+}
+
+.two-col {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.two-col .col-text {
+  flex: 1;
+  min-width: 0;
+}
+.two-col .col-phone {
+  flex: 0 0 230px;
+}
+
+.reveal table {
+  font-size: 0.6em;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.2em 0;
+}
+.reveal table th {
+  background: var(--accent);
+  color: #fff;
+  padding: 4px 8px;
+  text-align: left;
+}
+.reveal table td {
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--gray-border);
+}
+.reveal table tr:nth-child(even) td {
+  background: var(--gray-light);
+}
+
+.steps {
+  counter-reset: step-counter;
+  list-style: none;
+  padding-left: 0;
+}
+.steps li {
+  counter-increment: step-counter;
+  margin-bottom: 0.3em;
+  padding-left: 2em;
+  position: relative;
+}
+.steps li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  width: 1.5em;
+  height: 1.5em;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1.5em;
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+.point-box {
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  padding: 7px 12px;
+  border-radius: 0 8px 8px 0;
+  margin: 0.3em 0;
+  font-size: 0.65em;
+}
+.point-box.warn {
+  background: #fff3e0;
+  border-left-color: var(--orange);
+}
+.point-box.success {
+  background: #e8f5e9;
+  border-left-color: var(--green);
+}
+
+.title-slide {
+  text-align: center !important;
+}
+.title-slide h1 {
+  font-size: 2.2em;
+  margin-bottom: 0.2em;
+}
+.title-slide .subtitle {
+  font-size: 0.9em;
+  color: var(--gray);
+  margin-bottom: 1em;
+}
+.title-slide .app-icon {
+  width: 100px;
+  height: 100px;
+  background: var(--accent);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3em;
+  margin: 0 auto 0.5em;
+  color: #fff;
+}
+
+/* スプシモック */
+.sheet-mock {
+  background: #fff;
+  border: 2px solid var(--gray-border);
+  border-radius: 8px;
+  font-size: 0.55em;
+  overflow: hidden;
+  margin: 0.3em 0;
+}
+.sheet-tabs {
+  display: flex;
+  background: #e8e8e8;
+  padding: 0;
+}
+.sheet-tab {
+  padding: 4px 10px;
+  font-size: 0.9em;
+  border-right: 1px solid var(--gray-border);
+  cursor: default;
+}
+.sheet-tab.active {
+  background: #fff;
+  font-weight: 600;
+  color: var(--accent-dark);
+}
+.sheet-body {
+  padding: 6px;
+}
+.sheet-body table {
+  width: 100%;
+  font-size: 1em;
+}
+.sheet-body table th {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  padding: 3px 6px;
+  font-size: 0.9em;
+}
+.sheet-body table td {
+  padding: 2px 6px;
+  font-size: 0.9em;
+}
+
+/* 新機能ハイライト */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 0.5em;
+}
+.feature-card {
+  background: #fff;
+  border: 2px solid var(--gray-border);
+  border-radius: 12px;
+  padding: 14px;
+  position: relative;
+}
+.feature-card .feature-icon {
+  font-size: 1.8em;
+  margin-bottom: 0.2em;
+}
+.feature-card h3 {
+  margin: 0 0 0.2em;
+  font-size: 0.85em;
+}
+.feature-card p {
+  margin: 0;
+  font-size: 0.6em;
+  color: #555;
+}
+.feature-card .new-tag {
+  position: absolute;
+  top: -6px;
+  right: 10px;
+  background: var(--green);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.55em;
+  font-weight: 700;
+}
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ==================== 1. タイトル ==================== -->
+<section class="title-slide">
+  <div class="app-icon">🐕</div>
+  <h1>DogNote<br>アップデートのご案内</h1>
+  <p class="subtitle">2026年2月 新機能リリース</p>
+  <p class="small" style="text-align:center;margin-top:1em;">5つの新機能で、講師と生徒のデータ共有がもっと便利に</p>
+</section>
+
+<!-- ==================== 2. アップデート概要 ==================== -->
+<section>
+  <h2>今回のアップデート一覧</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="new-tag">NEW</div>
+      <div class="feature-icon">📋</div>
+      <h3>講師専用ページ</h3>
+      <p>ナビバーから直接アクセス。<br>生徒の一覧・データ閲覧がワンタップ。</p>
+    </div>
+    <div class="feature-card">
+      <div class="new-tag">NEW</div>
+      <div class="feature-icon">💬</div>
+      <h3>講師コメント機能</h3>
+      <p>生徒ごとにコメントを記録・保存。<br>トレーニングのアドバイスに。</p>
+    </div>
+    <div class="feature-card">
+      <div class="new-tag">NEW</div>
+      <div class="feature-icon">📊</div>
+      <h3>全生徒レポート出力</h3>
+      <p>全生徒のデータを1つの<br>スプレッドシートにまとめて出力。</p>
+    </div>
+    <div class="feature-card">
+      <div class="new-tag">NEW</div>
+      <div class="feature-icon">🔐</div>
+      <h3>パスワード保存</h3>
+      <p>「パスワードを保存」チェックで<br>次回から自動ログイン。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== セクション仕切り ==================== -->
+<section class="section-divider">
+  <div class="icon">📋</div>
+  <h2>新機能 1</h2>
+  <p style="text-align:center;">講師専用ページ</p>
+</section>
+
+<!-- ==================== 3. 講師専用ページ ==================== -->
+<section>
+  <h2>講師専用ページ <span class="badge badge-new">NEW</span></h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>ナビバーに「講師用」タブが追加</h3>
+      <ul>
+        <li>画面下部のナビから<strong>直接アクセス</strong></li>
+        <li>管理画面でログイン済みなら<strong>PW入力不要</strong></li>
+        <li>講師名を選んで生徒一覧へ</li>
+      </ul>
+      <h3>生徒一覧画面</h3>
+      <ul>
+        <li>担当する<strong>全生徒</strong>をカード表示</li>
+        <li>犬名・散歩回数・記録数・最終同期日を一覧確認</li>
+        <li>タップで生徒の詳細データへ</li>
+      </ul>
+      <div class="point-box">
+        管理画面と講師用は役割が分離。<br>
+        <strong>管理画面</strong> = 指導者・ユーザーの追加/変更<br>
+        <strong>講師用</strong> = 生徒データの閲覧・コメント・出力
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">📋 講師ダッシュボード</div>
+        <div class="phone-body">
+          <div style="font-weight:600;font-size:0.95em;margin-bottom:4px;">田中先生の生徒</div>
+          <div class="phone-card" style="border-left:3px solid var(--accent);">
+            <div style="font-weight:600;">ポチ</div>
+            <div style="font-size:0.8em;color:var(--gray);">散歩 12回 / 記録 48件</div>
+          </div>
+          <div class="phone-card" style="border-left:3px solid var(--accent);">
+            <div style="font-weight:600;">ハナ</div>
+            <div style="font-size:0.8em;color:var(--gray);">散歩 8回 / 記録 32件</div>
+          </div>
+          <div class="phone-card" style="border-left:3px solid var(--accent);">
+            <div style="font-weight:600;">コロ</div>
+            <div style="font-size:0.8em;color:var(--gray);">散歩 5回 / 記録 20件</div>
+          </div>
+          <div class="phone-btn phone-btn-blue" style="margin-top:6px;">全生徒をスプシに出力</div>
+          <div class="phone-btn phone-btn-gray">一覧を更新</div>
+        </div>
+        <div class="phone-nav">
+          <span>📊 統計</span>
+          <span>🏠 ホーム</span>
+          <span>⚙️ 設定</span>
+          <span class="new-badge">📋 講師用</span>
+          <span>🔑 管理</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== セクション仕切り ==================== -->
+<section class="section-divider">
+  <div class="icon">💬</div>
+  <h2>新機能 2</h2>
+  <p style="text-align:center;">講師コメント機能</p>
+</section>
+
+<!-- ==================== 4. 講師コメント ==================== -->
+<section>
+  <h2>講師コメント機能 <span class="badge badge-new">NEW</span></h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>生徒ごとにコメントを記録</h3>
+      <ul>
+        <li>生徒詳細画面の下部に<strong>コメント入力欄</strong></li>
+        <li>「保存」ボタンで<strong>サーバーに永続保存</strong></li>
+        <li>次回開いた時も<strong>保存済みコメントが表示</strong></li>
+      </ul>
+      <h3>活用例</h3>
+      <ul>
+        <li>「犬への反応が減ってきた。距離を縮めて練習」</li>
+        <li>「来週はインターバルを短くする」</li>
+        <li>「保護者への連絡事項メモ」</li>
+      </ul>
+      <div class="point-box success">
+        コメントは講師のGoogleスプレッドシートに保存されるため、<br>
+        端末を変えても・ブラウザを閉じても消えません。
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">🐕 ポチ</div>
+        <div class="phone-body">
+          <div style="font-size:0.8em;font-weight:600;margin-bottom:2px;">今週のコメント</div>
+          <div class="phone-card" style="font-size:0.8em;">
+            今週は12件の記録（4回の散歩）。<br>
+            平均潜時は1.8秒。
+          </div>
+          <div style="font-size:0.8em;font-weight:600;margin-top:4px;">全体サマリー</div>
+          <div style="display:flex;gap:3px;margin:3px 0;">
+            <div class="phone-card" style="flex:1;text-align:center;">
+              <div style="font-weight:700;color:var(--accent);">48</div>
+              <div style="font-size:0.7em;">記録</div>
+            </div>
+            <div class="phone-card" style="flex:1;text-align:center;">
+              <div style="font-weight:700;color:var(--accent);">1.8秒</div>
+              <div style="font-size:0.7em;">潜時</div>
+            </div>
+          </div>
+          <div style="font-size:0.8em;font-weight:600;margin-top:4px;color:var(--green);">講師コメント</div>
+          <div class="phone-textarea">犬への反応が減少傾向。来週は距離5mで練習。</div>
+          <div style="display:flex;gap:4px;align-items:center;margin:2px 0;">
+            <div class="phone-btn phone-btn-blue" style="width:auto;padding:4px 12px;margin:0;">保存</div>
+            <span style="font-size:0.8em;color:var(--green);">保存しました</span>
+          </div>
+          <div class="phone-btn phone-btn-blue" style="margin-top:6px;">スプレッドシートに出力</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== セクション仕切り ==================== -->
+<section class="section-divider">
+  <div class="icon">📊</div>
+  <h2>新機能 3</h2>
+  <p style="text-align:center;">全生徒レポート出力</p>
+</section>
+
+<!-- ==================== 5. 全生徒レポート ==================== -->
+<section>
+  <h2>全生徒レポート出力 <span class="badge badge-new">NEW</span></h2>
+  <h3>1タップで全生徒のデータをスプレッドシートにまとめて出力</h3>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div class="col-text">
+      <h3>出力される内容</h3>
+      <table>
+        <tr><th>シート名</th><th>内容</th></tr>
+        <tr><td>サマリー</td><td>全生徒の概要一覧</td></tr>
+        <tr><td>ポチ</td><td>ポチの全行動記録</td></tr>
+        <tr><td>ハナ</td><td>ハナの全行動記録</td></tr>
+        <tr><td>コロ</td><td>コロの全行動記録</td></tr>
+      </table>
+      <h3>サマリーシートの項目</h3>
+      <ul>
+        <li>犬名 / 散歩回数 / 記録数</li>
+        <li>平均潜時 / 平均距離</li>
+        <li>今週のコメント</li>
+      </ul>
+      <div class="point-box">
+        出力後、画面にリンクが表示されます。<br>
+        タップでスプレッドシートを開けます。
+      </div>
+    </div>
+    <div class="col-phone" style="flex:0 0 340px;">
+      <div class="sheet-mock">
+        <div class="sheet-tabs">
+          <div class="sheet-tab active">サマリー</div>
+          <div class="sheet-tab">ポチ</div>
+          <div class="sheet-tab">ハナ</div>
+          <div class="sheet-tab">コロ</div>
+        </div>
+        <div class="sheet-body">
+          <table>
+            <tr><th>犬名</th><th>散歩</th><th>記録</th><th>潜時</th><th>距離</th><th>今週</th></tr>
+            <tr><td>ポチ</td><td>12</td><td>48</td><td>1.8秒</td><td>8m</td><td>12件(4回)</td></tr>
+            <tr><td>ハナ</td><td>8</td><td>32</td><td>2.5秒</td><td>10m</td><td>8件(2回)</td></tr>
+            <tr><td>コロ</td><td>5</td><td>20</td><td>3.1秒</td><td>12m</td><td>記録なし</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="sheet-mock" style="margin-top:8px;">
+        <div class="sheet-tabs">
+          <div class="sheet-tab">サマリー</div>
+          <div class="sheet-tab active">ポチ</div>
+          <div class="sheet-tab">ハナ</div>
+          <div class="sheet-tab">コロ</div>
+        </div>
+        <div class="sheet-body">
+          <table>
+            <tr><th>日時</th><th>刺激</th><th>行動</th><th>潜時</th><th>距離</th></tr>
+            <tr><td>2/25 14:32</td><td>犬</td><td>吠え</td><td>2秒</td><td>5m</td></tr>
+            <tr><td>2/25 14:35</td><td>人</td><td>AC</td><td>1秒</td><td>10m</td></tr>
+            <tr><td>2/24 10:15</td><td>犬</td><td>突進</td><td>3秒</td><td>3m</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 6. 個別出力とURL表示 ==================== -->
+<section>
+  <h2>スプレッドシート出力の改善</h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>変更点</h3>
+      <ul>
+        <li>出力ボタンを<strong>画面の一番下</strong>に配置</li>
+        <li>出力後は<strong>URLリンクを画面に表示</strong></li>
+        <li>リンクをタップしてスプレッドシートを開く</li>
+        <li>出力したファイルは<strong>指定のGoogleドライブフォルダ</strong>に自動保存</li>
+      </ul>
+      <h3>2種類の出力</h3>
+      <table>
+        <tr><th>ボタン</th><th>出力内容</th><th>場所</th></tr>
+        <tr><td>全生徒をスプシに出力</td><td>全生徒まとめて1ファイル</td><td>生徒一覧画面</td></tr>
+        <tr><td>スプレッドシートに出力</td><td>選択した生徒のみ</td><td>生徒詳細画面</td></tr>
+      </table>
+      <div class="point-box">
+        出力されたスプレッドシートはリンクを知っている方なら<br>
+        誰でも閲覧できます。保護者への共有にもお使いください。
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">🐕 ポチ</div>
+        <div class="phone-body">
+          <div class="phone-card" style="font-size:0.8em;">
+            今週のコメント...<br>
+            全体サマリー...
+          </div>
+          <div style="font-size:0.8em;font-weight:600;margin-top:4px;">講師コメント</div>
+          <div class="phone-textarea" style="min-height:25px;">来週は距離5mで練習。</div>
+          <div class="phone-btn phone-btn-blue" style="margin-top:8px;">スプレッドシートに出力</div>
+          <div class="phone-link">スプレッドシートを開く</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== セクション仕切り ==================== -->
+<section class="section-divider">
+  <div class="icon">🔐</div>
+  <h2>新機能 4</h2>
+  <p style="text-align:center;">パスワード保存</p>
+</section>
+
+<!-- ==================== 7. パスワード保存 ==================== -->
+<section>
+  <h2>パスワード保存機能 <span class="badge badge-new">NEW</span></h2>
+  <div class="two-col">
+    <div class="col-text">
+      <h3>毎回のパスワード入力が不要に</h3>
+      <ol class="steps">
+        <li>ログイン画面で「<strong>パスワードを保存</strong>」にチェック</li>
+        <li>パスワードを入力してログイン</li>
+        <li>次回以降は<strong>自動でログイン</strong>（ブラウザを閉じてもOK）</li>
+      </ol>
+      <h3>ポイント</h3>
+      <ul>
+        <li>管理画面・講師用の<strong>どちらで保存しても両方に有効</strong></li>
+        <li>管理画面でログイン済み → 講師用タブで<strong>PW入力スキップ</strong></li>
+        <li>ログアウトすると<strong>保存されたPWも削除</strong></li>
+      </ul>
+      <div class="point-box warn">
+        <strong>セキュリティ上の注意</strong><br>
+        共有端末（複数人で使うPC等）では「パスワードを保存」は<br>
+        オフのままにしてください。
+      </div>
+    </div>
+    <div class="col-phone">
+      <div class="phone-mock">
+        <div class="phone-header">📋 講師ダッシュボード</div>
+        <div class="phone-body">
+          <div style="text-align:center;font-size:0.85em;color:var(--gray);margin:8px 0;">
+            パスワードを入力してください
+          </div>
+          <span class="phone-label">パスワード</span>
+          <div class="phone-input">••••••••</div>
+          <div class="phone-check">
+            <span style="display:inline-block;width:14px;height:14px;border:2px solid var(--accent);border-radius:3px;background:var(--accent);text-align:center;color:#fff;font-size:0.8em;line-height:14px;">&#10003;</span>
+            パスワードを保存
+          </div>
+          <div class="phone-btn phone-btn-blue" style="margin-top:6px;">次へ</div>
+          <div style="text-align:center;margin-top:12px;font-size:0.8em;color:var(--gray);">
+            --- 次回アクセス時 ---
+          </div>
+          <div style="text-align:center;margin:6px 0;font-size:0.85em;color:var(--green);font-weight:600;">
+            自動ログイン完了
+          </div>
+          <div style="font-size:0.8em;font-weight:600;margin-top:4px;">あなたのお名前を選んでください</div>
+          <div class="phone-btn phone-btn-blue">田中先生</div>
+          <div class="phone-btn phone-btn-blue">佐藤先生</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 8. 画面構成まとめ ==================== -->
+<section>
+  <h2>画面構成まとめ</h2>
+  <h3>ナビゲーションバー（5タブ）</h3>
+  <div style="display:flex;justify-content:center;gap:6px;margin:0.4em 0;">
+    <div style="text-align:center;padding:8px 16px;background:var(--gray-light);border-radius:8px;font-size:0.65em;">
+      <div style="font-size:1.6em;">📊</div>統計
+    </div>
+    <div style="text-align:center;padding:8px 16px;background:var(--gray-light);border-radius:8px;font-size:0.65em;">
+      <div style="font-size:1.6em;">🏠</div>ホーム
+    </div>
+    <div style="text-align:center;padding:8px 16px;background:var(--gray-light);border-radius:8px;font-size:0.65em;">
+      <div style="font-size:1.6em;">⚙️</div>設定
+    </div>
+    <div style="text-align:center;padding:8px 16px;background:var(--accent-light);border:2px solid var(--accent);border-radius:8px;font-size:0.65em;">
+      <div style="font-size:1.6em;">📋</div><strong>講師用</strong><br><span class="badge badge-new" style="font-size:0.8em;">NEW</span>
+    </div>
+    <div style="text-align:center;padding:8px 16px;background:var(--gray-light);border-radius:8px;font-size:0.65em;">
+      <div style="font-size:1.6em;">🔑</div>管理
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:0.4em;">
+    <div>
+      <h3>飼い主（生徒）が使う画面</h3>
+      <table>
+        <tr><th>タブ</th><th>機能</th></tr>
+        <tr><td>🏠 ホーム</td><td>散歩記録の開始・結果確認</td></tr>
+        <tr><td>📊 統計</td><td>行動分析・グラフ・CSV出力</td></tr>
+        <tr><td>⚙️ 設定</td><td>犬の管理・記録項目・同期</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>講師が使う画面</h3>
+      <table>
+        <tr><th>タブ</th><th>機能</th></tr>
+        <tr><td>📋 講師用</td><td>生徒一覧・データ閲覧・コメント・出力</td></tr>
+        <tr><td>🔑 管理</td><td>指導者追加・ユーザー割当変更</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 9. まとめ ==================== -->
+<section class="title-slide">
+  <h2 style="margin-bottom:0.5em;">アップデートまとめ</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:600px;margin:0 auto 0.6em;text-align:center;">
+    <div class="point-box" style="text-align:center;">
+      <strong>📋 講師専用ページ</strong><br>
+      <span style="font-size:0.9em;">ナビから直接アクセス<br>PW引き継ぎで手間なし</span>
+    </div>
+    <div class="point-box" style="text-align:center;">
+      <strong>💬 講師コメント</strong><br>
+      <span style="font-size:0.9em;">生徒ごとにメモを保存<br>次回も自動表示</span>
+    </div>
+    <div class="point-box" style="text-align:center;">
+      <strong>📊 レポート出力</strong><br>
+      <span style="font-size:0.9em;">全生徒一括 or 個別出力<br>URLリンクで簡単共有</span>
+    </div>
+    <div class="point-box" style="text-align:center;">
+      <strong>🔐 PW保存</strong><br>
+      <span style="font-size:0.9em;">チェック1つで次回から<br>自動ログイン</span>
+    </div>
+  </div>
+  <p class="small" style="text-align:center;margin-top:1.5em;">
+    ← → キーでスライド切替 / Esc でスライド一覧 / F でフルスクリーン
+  </p>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: true,
+  width: 960,
+  height: 700,
+  margin: 0.08,
+  transition: 'slide',
+  center: false
+});
+</script>
+</body>
+</html>
